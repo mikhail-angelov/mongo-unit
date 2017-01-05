@@ -1,0 +1,37 @@
+{
+  "name": "mongo-unit",
+  "version": "1.0.0",
+  "description": "mongo db for unit tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikhail-angelov/mongo-unit.git"
+  },
+  "keywords": [
+    "js",
+    "unit",
+    "test",
+    "db",
+    "unit",
+    "mongo",
+    "mongodb"
+  ],
+  "author": "Mikhail Angelov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikhail-angelov/mongo-unit/issues"
+  },
+  "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
+  "dependencies": {
+    "mongodb-prebuilt": "^5.0.8",
+    "portfinder": "^1.0.10",
+    "mongodb": "^2.2.19"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
