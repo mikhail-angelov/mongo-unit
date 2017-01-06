@@ -1,10 +1,11 @@
 {
   "name": "mongo-unit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "mongo db for unit tests",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test.js"
+    "test": "mocha test.js",
+    "test-basic": "mocha ./examples/basic.js"
   },
   "repository": {
     "type": "git",
@@ -15,9 +16,11 @@
     "unit",
     "test",
     "db",
+    "database",
     "unit",
     "mongo",
-    "mongodb"
+    "mongodb",
+    "mongoose"
   ],
   "author": "Mikhail Angelov",
   "license": "MIT",
@@ -32,6 +35,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "mongoose": "^4.7.6"
   }
 }
