@@ -1,6 +1,6 @@
 {
   "name": "mongo-unit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "mongo db for unit tests",
   "main": "index.js",
   "scripts": {

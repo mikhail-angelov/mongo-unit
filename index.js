@@ -1,11 +1,14 @@
 'use strict';
 
+//process.env.DEBUG= '*'
 const portfinder = require('portfinder')
 const mongodbServer = require('mongodb-prebuilt')
-const client = require('mongodb').MongoClient;
+const client = require('mongodb').MongoClient
 const fs = require('fs')
+const exec = require('child_process').execSync
 
-const defaultTempDir = __dirname + '/.mongo-unit'
+const dataFolder = '/.mongo-unit'
+const defaultTempDir = __dirname + dataFolder
 const defaultMongoOpts = {
   dbName:'test',
   auto_shutdown: true,
@@ -24,6 +27,7 @@ function start(opts) {
   } else {
     const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
     makeSureTempDirExist(defaultTempDir)
+    makeSureOtherMongoProcessesKilled(dataFolder)
     return getFreePort(mongo_opts.args.port)
       .then(port => {
         mongo_opts.args.port = port
@@ -91,6 +95,14 @@ function makeSureTempDirExist(dir) {
     if (e.code !== "EEXIST") {
       throw e;
     }
+  }
+}
+
+function makeSureOtherMongoProcessesKilled(dataFolder){
+  const query = 'ps aux | grep "'+dataFolder+'" | grep -v "grep" | awk \'{print $2}\''
+  const otherMongoProcesses = exec(query).toString()
+  if(otherMongoProcesses){
+    exec('kill $('+query+')')
   }
 }
 
