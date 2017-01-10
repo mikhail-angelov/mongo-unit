@@ -1,6 +1,6 @@
 {
   "name": "mongo-unit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "mongo db for unit tests",
   "main": "index.js",
   "scripts": {
@@ -29,9 +29,10 @@
   },
   "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
   "dependencies": {
+    "mongodb": "^2.2.19",
     "mongodb-prebuilt": "^5.0.8",
     "portfinder": "^1.0.10",
-    "mongodb": "^2.2.19"
+    "ps-node": "^0.1.4"
   },
   "devDependencies": {
     "chai": "^3.5.0",

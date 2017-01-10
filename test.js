@@ -78,4 +78,30 @@ describe('mongo-unit', function () {
       })
   })
 
+//   it('should list mongo',(done)=>{
+
+//     var ps = require('ps-node');
+
+// // A simple pid lookup
+// ps.lookup({
+//   psargs:['-A'],
+//   command: 'mongod',
+//   arguments: '.mongo-unit'
+
+//     }, function(err, resultList ) {
+//       console.log('ps', err, resultList)
+//     if (err) {
+//         throw new Error( err );
+//     }
+
+//     resultList.forEach(function( process ){
+//         if( process ){
+
+//             console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments );
+//         }
+//     });
+//     done()
+// });
+//   })
+
 })

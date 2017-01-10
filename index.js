@@ -5,7 +5,7 @@ const portfinder = require('portfinder')
 const mongodbServer = require('mongodb-prebuilt')
 const client = require('mongodb').MongoClient
 const fs = require('fs')
-const exec = require('child_process').execSync
+const ps = require('ps-node');
 
 const dataFolder = '/.mongo-unit'
 const defaultTempDir = __dirname + dataFolder
@@ -26,12 +26,12 @@ function start(opts) {
     return Promise.resolve(dbUrl)
   } else {
     const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
-    makeSureTempDirExist(defaultTempDir)
-    makeSureOtherMongoProcessesKilled(dataFolder)
-    return getFreePort(mongo_opts.args.port)
+    makeSureTempDirExist(mongo_opts.args.dbpath)
+    return makeSureOtherMongoProcessesKilled(mongo_opts.args.dbpath)
+      .then(()=>getFreePort(mongo_opts.args.port))
       .then(port => {
         mongo_opts.args.port = port
-        if (mongodbServer.start_server(mongo_opts) === 0) {
+        if (mongodbServer.start_server(mongo_opts,(err)=>{console.log('mongo start error', err)}) === 0) {
           dbUrl = 'mongodb://localhost:' + port+'/'+mongo_opts.dbName
           return dbUrl
         } else {
@@ -99,11 +99,25 @@ function makeSureTempDirExist(dir) {
 }
 
 function makeSureOtherMongoProcessesKilled(dataFolder){
-  const query = 'ps aux | grep "'+dataFolder+'" | grep -v "grep" | awk \'{print $2}\''
-  const otherMongoProcesses = exec(query).toString()
-  if(otherMongoProcesses){
-    exec('kill $('+query+')')
-  }
+  return new Promise((resolve, reject)=>{
+    ps.lookup({
+        psargs:['-A'],
+        command: 'mongod',
+        arguments: dataFolder
+      }, (err, resultList ) => {
+        if (err) {
+            return reject( err )
+        }
+
+        resultList.forEach(process =>{
+            if( process ){
+                console.log( 'KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments )
+                ps.kill(process.pid)
+            }
+        });
+        return resolve()
+    })
+  })
 }
 
 module.exports = {
