@@ -4,6 +4,7 @@ const expect = require('chai').expect
 const MongoClient = require('mongodb').MongoClient
 
 describe('mongo-unit', function () {
+  this.timeout(100000)
   const mongoUnit = require('./index')
   const testData = {
     col1: [{doc: 1}, {doc: 2}],

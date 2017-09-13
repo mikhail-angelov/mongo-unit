@@ -2,7 +2,7 @@
 
 //process.env.DEBUG= '*'
 const portfinder = require('portfinder')
-const mongodbServer = require('mongodb-prebuilt')
+const {MongodHelper} = require('mongodb-prebuilt')
 const client = require('mongodb').MongoClient
 const fs = require('fs')
 const ps = require('ps-node');
@@ -31,12 +31,12 @@ function start(opts) {
       .then(()=>getFreePort(mongo_opts.args.port))
       .then(port => {
         mongo_opts.args.port = port
-        if (mongodbServer.start_server(mongo_opts,(err)=>{console.log('mongo start error', err)}) === 0) {
-          dbUrl = 'mongodb://localhost:' + port+'/'+mongo_opts.dbName
-          return dbUrl
-        } else {
-          return Promise.reject('cannot start mongod')
-        }
+        const mongodHelper = new MongodHelper(['--port', port, '--dbpath', mongo_opts.args.dbpath,'--storageEngine', 'ephemeralForTest']);
+        return mongodHelper.run()
+          .then(()=>{
+            dbUrl = 'mongodb://localhost:' + port+'/'+mongo_opts.dbName
+            return dbUrl
+          })
       })
   }
 }
@@ -81,6 +81,7 @@ function getFreePort(possiblePort) {
   portfinder.basePort = possiblePort
   return new Promise((resolve, reject) => portfinder.getPort((err, port) => {
     if (err) {
+      console.log('cannot get free port', err)
       reject(err)
     } else {
       resolve(port)
@@ -93,6 +94,7 @@ function makeSureTempDirExist(dir) {
     fs.mkdirSync(dir);
   } catch (e) {
     if (e.code !== "EEXIST") {
+      console.log('cannot create db folder', dir, e)
       throw e;
     }
   }
@@ -106,6 +108,7 @@ function makeSureOtherMongoProcessesKilled(dataFolder){
         arguments: dataFolder
       }, (err, resultList ) => {
         if (err) {
+            console.log('ps-node error', err)
             return reject( err )
         }
 
