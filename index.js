@@ -2,7 +2,7 @@
 
 //process.env.DEBUG= '*'
 const portfinder = require('portfinder')
-const {MongodHelper} = require('mongodb-prebuilt')
+const MongodHelper = require('mongodb-prebuilt').MongodHelper
 const client = require('mongodb').MongoClient
 const fs = require('fs')
 const ps = require('ps-node');
