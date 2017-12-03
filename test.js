@@ -12,7 +12,7 @@ describe('mongo-unit', function () {
     col2: [{rec: 1}, {rec: 2}]
   }
 
-  before(() => mongoUnit.start({verbose:false}))
+  before(() => mongoUnit.start({verbose:true}))
 
   afterEach(() => mongoUnit.drop())
 
