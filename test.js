@@ -5,7 +5,7 @@ const MongoClient = require('mongodb').MongoClient
 const co = require('co')
 
 describe('mongo-unit', function () {
-  this.timeout(100000)
+  this.timeout(10000000)
   const mongoUnit = require('./index')
   const testData = {
     col1: [{doc: 1}, {doc: 2}],
