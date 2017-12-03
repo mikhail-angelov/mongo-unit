@@ -12,7 +12,7 @@ describe('mongo-unit', function () {
   }
 
 
-  before(() => mongoUnit.start())
+  before(() => mongoUnit.start({verbose:false}))
 
   afterEach(() => mongoUnit.drop())
 

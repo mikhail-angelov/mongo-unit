@@ -1,43 +1,47 @@
 'use strict';
-
 //process.env.DEBUG= '*'
+const Debug = require('debug')
 const portfinder = require('portfinder')
-const MongodHelper = require('mongodb-prebuilt').MongodHelper
 const client = require('mongodb').MongoClient
 const fs = require('fs')
-const ps = require('ps-node');
+const ps = require('ps-node')
+const debug = Debug('mongo-unit')
 
 const dataFolder = '/.mongo-unit'
 const defaultTempDir = __dirname + dataFolder
 const defaultMongoOpts = {
   dbName:'test',
-  auto_shutdown: true,
-  args: {
-    storageEngine: "ephemeralForTest",
-    dbpath: defaultTempDir,
-    port: 27017
-  }
+  dbpath: defaultTempDir,
+  port: 27017,
 }
 
 var dbUrl
 
+function runMogo(opts, port){
+  const MongodHelper = require('mongodb-prebuilt').MongodHelper
+  opts.port = port
+  const mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath,'--storageEngine', 'ephemeralForTest']);
+  return mongodHelper.run()
+    .then(()=>{
+      dbUrl = 'mongodb://localhost:' + port+'/'+opts.dbName
+      debug(`mongo is started on ${dbUrl}`)
+      return dbUrl
+    })
+}
+
 function start(opts) {
+  const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
+  Debug.enable('mongo-unit')
+  if(mongo_opts.verbose){
+    Debug.enable('*')
+  }
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
-    const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
-    makeSureTempDirExist(mongo_opts.args.dbpath)
-    return makeSureOtherMongoProcessesKilled(mongo_opts.args.dbpath)
-      .then(()=>getFreePort(mongo_opts.args.port))
-      .then(port => {
-        mongo_opts.args.port = port
-        const mongodHelper = new MongodHelper(['--port', port, '--dbpath', mongo_opts.args.dbpath,'--storageEngine', 'ephemeralForTest']);
-        return mongodHelper.run()
-          .then(()=>{
-            dbUrl = 'mongodb://localhost:' + port+'/'+mongo_opts.dbName
-            return dbUrl
-          })
-      })
+    makeSureTempDirExist(mongo_opts.dbpath)
+    return makeSureOtherMongoProcessesKilled(mongo_opts.dbpath)
+      .then(()=>getFreePort(mongo_opts.port))
+      .then(port => runMogo(mongo_opts, port))
   }
 }
 
@@ -60,7 +64,6 @@ function load(data) {
     })
 }
 
-
 function clean(data) {
   return client.connect(getUrl())
     .then(db => {
@@ -81,7 +84,7 @@ function getFreePort(possiblePort) {
   portfinder.basePort = possiblePort
   return new Promise((resolve, reject) => portfinder.getPort((err, port) => {
     if (err) {
-      console.log('cannot get free port', err)
+      debug(`cannot get free port: ${err}`)
       reject(err)
     } else {
       resolve(port)

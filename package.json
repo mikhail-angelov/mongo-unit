@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
   "dependencies": {
+    "debug": "^3.0.1",
     "mongodb": "~2.2.31",
     "mongodb-prebuilt": "~6.3.3",
     "portfinder": "^1.0.10",

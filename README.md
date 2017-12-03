@@ -21,9 +21,12 @@ It works on Node.js 4+ (ES2015)
 
 ### `start(opts)`
 It starts mongod on one of available port and returns Promise with URL to connect to this db
-`opts` i optional params, you can specify your own command line params for mongod 
+`opts` is optional params, you can specify some command line params for mongod 
 (more about it in documentation for [mongodb-prebuilt](https://github.com/winfinit/mongodb-prebuilt))
- `opts.dbName` - specify name of test db, it will be `test` by default
+ `opts.port` - preferable mongo db port, default: `27017`
+ `opts.dbName` - name of test db, default: `test`
+ `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
+ `opts.verbose` - enable debug informaton for mongodb-prebuilt, default: `false`
   
 ### `getUrl()`
 Syncronius API returns URL to connect to test db, if test DB is not started it thows an Exception
