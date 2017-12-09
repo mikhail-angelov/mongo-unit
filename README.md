@@ -1,5 +1,4 @@
 # mongo-unit
-[![build status](https://travis-ci.org/mikhail-angelov/mongo-unit.svg?branch=master)](https://travis-ci.org/mikhail-angelov/mongo-unit)
 
 [![NPM](https://nodei.co/npm/mongo-unit.png)](https://nodei.co/npm/mongo-unit)
 
@@ -52,6 +51,12 @@ Clear collections based on given data (data format is the same), returns Promise
 
 ### `drop()`
 Drops test DB, returns Promise.
+
+### `initDb(url, data)`
+helper function, load db data into mongo (url)
+
+### `dropDb(url)`
+helper function, clear all db data from mongo (url)
 
 ### Basic Usage
 
