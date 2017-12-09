@@ -1,3 +1,4 @@
+'use strict';
 //process.env.DEBUG= '*'
 const Debug = require('debug')
 const portfinder = require('portfinder')
