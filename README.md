@@ -1,5 +1,5 @@
 # mongo-unit
-{<img src="https://circleci.com/gh/mikhail-angelov/mongo-unit.svg?style=svg" alt="Circle CI" />}[https://circleci.com/gh/mikhail-angelov/mongo-unit]
+[![CircleCI](https://circleci.com/gh/mikhail-angelov/mongo-unit.svg?style=svg)](https://circleci.com/gh/mikhail-angelov/mongo-unit)
 
 
 [![NPM](https://nodei.co/npm/mongo-unit.png)](https://nodei.co/npm/mongo-unit)
