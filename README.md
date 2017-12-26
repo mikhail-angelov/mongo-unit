@@ -28,7 +28,10 @@ It starts mongod on one of available port and returns Promise with URL to connec
  `opts.dbName` - name of test db, default: `test`
  `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
  `opts.verbose` - enable debug informaton for mongodb-prebuilt, default: `false`
-  
+
+### `stop()`
+It stops mongod process
+
 ### `getUrl()`
 Syncronius API returns URL to connect to test db, if test DB is not started it thows an Exception
 

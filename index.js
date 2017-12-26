@@ -1,5 +1,4 @@
 'use strict';
-//process.env.DEBUG= '*'
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const client = require('mongodb').MongoClient
@@ -15,12 +14,13 @@ const defaultMongoOpts = {
   port: 27017,
 }
 
+var mongodHelper
 var dbUrl
 
 function runMogo(opts, port){
   const MongodHelper = require('mongodb-prebuilt').MongodHelper
   opts.port = port
-  const mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath,'--storageEngine', 'ephemeralForTest']);
+  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath,'--storageEngine', 'ephemeralForTest']);
   return mongodHelper.run()
     .then(()=>{
       dbUrl = 'mongodb://localhost:' + port+'/'+opts.dbName
@@ -43,6 +43,14 @@ function start(opts) {
       .then(()=>getFreePort(mongo_opts.port))
       .then(port => runMogo(mongo_opts, port))
   }
+}
+
+function delay(time){
+  return new Promise(resolve=>setTimeout(resolve, time))
+}
+function stop(){
+  mongodHelper && mongodHelper.mongoBin.childProcess.kill()
+  return delay(100) //this is small delay to make sure kill signal is sent
 }
 
 function getUrl() {
@@ -148,6 +156,7 @@ function dropDb(url) {
 
 module.exports = {
   start,
+  stop,
   getUrl,
   load,
   clean,

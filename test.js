@@ -14,6 +14,8 @@ describe('mongo-unit', function () {
 
   before(() => mongoUnit.start({verbose:true}))
 
+  after(() => mongoUnit.stop())
+
   afterEach(() => mongoUnit.drop())
 
   it('should safely start mongo several time', () => {
