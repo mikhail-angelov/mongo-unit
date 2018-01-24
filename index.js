@@ -50,6 +50,7 @@ function delay(time){
 }
 function stop(){
   mongodHelper && mongodHelper.mongoBin.childProcess.kill()
+  dbUrl = null;
   return delay(100) //this is small delay to make sure kill signal is sent
 }
 

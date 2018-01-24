@@ -12,7 +12,7 @@ describe('mongo-unit', function () {
     col2: [{rec: 1}, {rec: 2}]
   }
 
-  before(() => mongoUnit.start({verbose:true}))
+  before(() => mongoUnit.start({}))
 
   after(() => mongoUnit.stop())
 
@@ -109,4 +109,14 @@ describe('mongo-unit', function () {
 // });
 //   })
 
+    it('should stop mongo and start again', () => {
+        return mongoUnit.stop()
+            .then(() => {
+                expect(mongoUnit.getUrl).to.throw(Error);
+                return mongoUnit.start();
+            })
+            .then(url => {
+                expect(url).to.equal(mongoUnit.getUrl());
+            });
+    });
 })
