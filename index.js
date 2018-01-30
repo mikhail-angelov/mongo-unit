@@ -69,7 +69,7 @@ function load(data) {
         const collection = db.collection(col)
         return collection.insert(data[col])
       })
-      return Promise.all(queries)
+      return Promise.all(queries).then(() => db.close())
     })
 }
 
@@ -80,13 +80,13 @@ function clean(data) {
         const collection = db.collection(col)
         return collection.drop()
       })
-      return Promise.all(queries)
+      return Promise.all(queries).then(() => db.close())
     })
 }
 
 function drop() {
   return client.connect(getUrl())
-    .then(db => db.dropDatabase())
+    .then(db => db.dropDatabase().then(() => db.close()))
 }
 
 function getFreePort(possiblePort) {
