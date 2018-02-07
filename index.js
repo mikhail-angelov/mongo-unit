@@ -31,10 +31,6 @@ function runMogo(opts, port){
 
 function start(opts) {
   const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
-  Debug.enable('mongo-unit')
-  if(mongo_opts.verbose){
-    Debug.enable('*')
-  }
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
