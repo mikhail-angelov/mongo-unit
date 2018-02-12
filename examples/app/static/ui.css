@@ -1,0 +1,15 @@
+.main{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.task{
+  display: flex;
+}
+.id{
+  width: 200px;
+}
+.item{
+  width: 50px;
+}
