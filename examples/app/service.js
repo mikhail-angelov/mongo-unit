@@ -6,7 +6,7 @@ const TaskSchema = new mongoose.Schema({
   started: Date,
   completed: Boolean,
 })
-const Task = mongoose.model('Task', TaskSchema)
+const Task = mongoose.model('tasks', TaskSchema)
 
 module.exports = {
   getTasks: () => Task.find(),
