@@ -9,7 +9,7 @@ const debug = Debug('mongo-unit')
 const dataFolder = '/.mongo-unit'
 const defaultTempDir = __dirname + dataFolder
 const defaultMongoOpts = {
-  dbName:'test',
+  dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
 }
@@ -17,13 +17,13 @@ const defaultMongoOpts = {
 var mongodHelper
 var dbUrl
 
-function runMogo(opts, port){
+function runMogo(opts, port) {
   const MongodHelper = require('mongodb-prebuilt').MongodHelper
   opts.port = port
-  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath,'--storageEngine', 'ephemeralForTest']);
+  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath, '--storageEngine', 'ephemeralForTest']);
   return mongodHelper.run()
-    .then(()=>{
-      dbUrl = 'mongodb://localhost:' + port+'/'+opts.dbName
+    .then(() => {
+      dbUrl = 'mongodb://localhost:' + port + '/' + opts.dbName
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
     })
@@ -36,25 +36,25 @@ function start(opts) {
   } else {
     makeSureTempDirExist(mongo_opts.dbpath)
     return makeSureOtherMongoProcessesKilled(mongo_opts.dbpath)
-      .then(()=>getFreePort(mongo_opts.port))
+      .then(() => getFreePort(mongo_opts.port))
       .then(port => runMogo(mongo_opts, port))
   }
 }
 
-function delay(time){
-  return new Promise(resolve=>setTimeout(resolve, time))
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time))
 }
-function stop(){
+function stop() {
   mongodHelper && mongodHelper.mongoBin.childProcess.kill()
   dbUrl = null;
   return delay(100) //this is small delay to make sure kill signal is sent
 }
 
 function getUrl() {
-  if(dbUrl){
+  if (dbUrl) {
     return dbUrl
-  }else{
-    throw new Error('Please start mongo-unit firstm then use this API')
+  } else {
+    throw new Error('Please start mongo-unit first, then use this API')
   }
 }
 
@@ -108,25 +108,25 @@ function makeSureTempDirExist(dir) {
   }
 }
 
-function makeSureOtherMongoProcessesKilled(dataFolder){
-  return new Promise((resolve, reject)=>{
+function makeSureOtherMongoProcessesKilled(dataFolder) {
+  return new Promise((resolve, reject) => {
     ps.lookup({
-        psargs:['-A'],
-        command: 'mongod',
-        arguments: dataFolder
-      }, (err, resultList ) => {
-        if (err) {
-            console.log('ps-node error', err)
-            return reject( err )
-        }
+      psargs: ['-A'],
+      command: 'mongod',
+      arguments: dataFolder
+    }, (err, resultList) => {
+      if (err) {
+        console.log('ps-node error', err)
+        return reject(err)
+      }
 
-        resultList.forEach(process =>{
-            if( process ){
-                console.log( 'KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments )
-                ps.kill(process.pid)
-            }
-        });
-        return resolve()
+      resultList.forEach(process => {
+        if (process) {
+          console.log('KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments)
+          ps.kill(process.pid)
+        }
+      });
+      return resolve()
     })
   })
 }

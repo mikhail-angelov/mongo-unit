@@ -1,0 +1,26 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "basic.js",
+  "scripts": {
+    "test": "mocha --require ./it_helper.js --recursive ./*.it.js",
+    "e2e": "node e2e-runner.js",
+    "start": "node ./app"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "mongoose": "^5.0.4"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "co": "^4.6.0",
+    "hermione": "^0.58.0",
+    "mocha-prepare": "^0.1.0",
+    "selenium-standalone": "^6.12.0"
+  }
+}

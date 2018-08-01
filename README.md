@@ -51,7 +51,7 @@ Inserts given data (like below) DB collections, returns Promise.
 }
 ```
 
-### `clear(data)`
+### `clean(data)`
 Clear collections based on given data (data format is the same), returns Promise.
 
 ### `drop()`
