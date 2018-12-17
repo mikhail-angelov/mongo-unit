@@ -12,6 +12,7 @@ const defaultMongoOpts = {
   dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
+  version: 'latest',
 }
 
 var mongodHelper
@@ -20,7 +21,13 @@ var dbUrl
 function runMogo(opts, port) {
   const MongodHelper = require('mongodb-prebuilt').MongodHelper
   opts.port = port
-  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath, '--storageEngine', 'ephemeralForTest']);
+  mongodHelper = new MongodHelper([
+    '--port', port, 
+    '--dbpath', opts.dbpath, 
+    '--storageEngine', 'ephemeralForTest'
+  ], {
+    version: opts.version,
+  });
   return mongodHelper.run()
     .then(() => {
       dbUrl = 'mongodb://localhost:' + port + '/' + opts.dbName
