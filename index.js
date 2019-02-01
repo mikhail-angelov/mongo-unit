@@ -149,16 +149,19 @@ function initDb(url, data) {
         const collection = db.collection(col)
         return collection.insert(data[col])
       })
-      return Promise.all(requests)
+      return Promise.all(requests).then(() => db.close())
     })
 }
 
 function dropDb(url) {
   return client.connect(url)
-    .then(db => db.collections())
-    .then(collections => {
-      const requests = collections.map(col => col.drop())
-      return Promise.all(requests)
+    .then(db => {
+      return db.collections()
+        .then(collections => {
+          const requests = collections.map(col => col.drop())
+          return Promise.all(requests)
+        })
+        .then(() => db.close())
     })
 }
 
