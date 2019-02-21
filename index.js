@@ -145,9 +145,11 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 function initDb(url, data) {
   return client.connect(url)
     .then(db => {
-      const requests = Object.keys(data).map(col => {
+      // if data is a 
+      const dbData = typeof data === 'string' ? require(data) : data;
+      const requests = Object.keys(dbData).map(col => {
         const collection = db.collection(col)
-        return collection.insert(data[col])
+        return collection.insert(dbData[col])
       })
       return Promise.all(requests).then(() => db.close())
     })
