@@ -32,7 +32,7 @@
   "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
   "dependencies": {
     "debug": "^3.0.1",
-    "mongodb": "~2.2.31",
+    "mongodb": "^3.3.3",
     "mongodb-prebuilt": "~6.4.0",
     "portfinder": "^1.0.10",
     "ps-node": "^0.1.4"
