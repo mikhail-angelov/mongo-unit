@@ -26,7 +26,8 @@ describe('mongo-unit', function () {
   })
 
   it('should connect to db and CRUD docs', () => co(function*(){
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrlShort())
+    const db = client.db(mongoUnit.getDbName())
     const collection = db.collection('test')
     yield collection.insert({doc: 1})
     let results = yield collection.find().toArray()
@@ -39,7 +40,8 @@ describe('mongo-unit', function () {
 
   it('should load collection data', () => co(function*(){
     yield mongoUnit.load(testData)
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrlShort())
+    const db = client.db(mongoUnit.getDbName())
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
@@ -53,7 +55,8 @@ describe('mongo-unit', function () {
   it('should clean collection data', () => co(function*(){
     yield mongoUnit.load(testData)
     yield mongoUnit.clean(testData)
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrlShort())
+    const db = client.db(mongoUnit.getDbName())
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
@@ -63,9 +66,11 @@ describe('mongo-unit', function () {
   }))
 
   it('should init DB data for given URL', () => co(function*(){
-    const url = mongoUnit.getUrl()
-    yield mongoUnit.initDb(url, testData)
-    const db = yield MongoClient.connect(url)
+    const url = mongoUnit.getUrlShort()
+    const name = mongoUnit.getDbName()
+    yield mongoUnit.initDb(url, name, testData)
+    const client = yield MongoClient.connect(mongoUnit.getUrlShort())
+    const db = client.db(mongoUnit.getDbName())
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
@@ -75,10 +80,12 @@ describe('mongo-unit', function () {
   }))
 
   it('should dropDb DB data for given URL', () => co(function*(){
-    const url = mongoUnit.getUrl()
-    yield mongoUnit.initDb(url, testData)
-    yield mongoUnit.dropDb(url)
-    const db = yield MongoClient.connect(url)
+    const url = mongoUnit.getUrlShort()
+    const name = mongoUnit.getDbName()
+    yield mongoUnit.initDb(url, name, testData)
+    yield mongoUnit.dropDb(url, name)
+    const client = yield MongoClient.connect(url)
+    const db = client.db(name)
     const collections = yield db.listCollections().toArray()
     expect(collections.length).to.equal(0)
   }))

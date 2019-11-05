@@ -17,6 +17,8 @@ const defaultMongoOpts = {
 
 var mongodHelper
 var dbUrl
+var dbUrlShort
+var dbName
 
 function runMogo(opts, port) {
   const MongodHelper = require('mongodb-prebuilt').MongodHelper
@@ -31,6 +33,8 @@ function runMogo(opts, port) {
   return mongodHelper.run()
     .then(() => {
       dbUrl = 'mongodb://localhost:' + port + '/' + opts.dbName
+      dbUrlShort = 'mongodb://localhost:' + port
+      dbName = opts.dbName
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
     })
@@ -69,31 +73,49 @@ function getUrl() {
   }
 }
 
+function getUrlShort() {
+  if (dbUrlShort) {
+    return dbUrlShort
+  } else {
+    throw new Error('Please start mongo-unit first, then use this API')
+  }
+}
+
+function getDbName() {
+  if (dbName) {
+    return dbName
+  } else {
+    throw new Error('Please start mongo-unit first, then use this API')
+  }
+}
+
 function load(data) {
-  return client.connect(getUrl())
-    .then(db => {
+  return client.connect(getUrlShort())
+    .then(client => {
+      const db = client.db(getDbName())
       const queries = Object.keys(data).map(col => {
         const collection = db.collection(col)
         return collection.insert(data[col])
       })
-      return Promise.all(queries).then(() => db.close())
+      return Promise.all(queries).then(() => client.close())
     })
 }
 
 function clean(data) {
-  return client.connect(getUrl())
-    .then(db => {
+  return client.connect(getUrlShort())
+    .then(client => {
+      const db = client.db(getDbName())
       const queries = Object.keys(data).map(col => {
         const collection = db.collection(col)
         return collection.drop()
       })
-      return Promise.all(queries).then(() => db.close())
+      return Promise.all(queries).then(() => client.close())
     })
 }
 
 function drop() {
-  return client.connect(getUrl())
-    .then(db => db.dropDatabase().then(() => db.close()))
+  return client.connect(getUrlShort())
+    .then(client => client.db(getDbName()).dropDatabase().then(() => client.close()))
 }
 
 function getFreePort(possiblePort) {
@@ -142,26 +164,28 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
   })
 }
 
-function initDb(url, data) {
+function initDb(url, name, data) {
   return client.connect(url)
-    .then(db => {
+    .then(client => {
+      const db = client.db(name)
       const requests = Object.keys(data).map(col => {
         const collection = db.collection(col)
         return collection.insert(data[col])
       })
-      return Promise.all(requests).then(() => db.close())
+      return Promise.all(requests).then(() => client.close())
     })
 }
 
-function dropDb(url) {
+function dropDb(url, name) {
   return client.connect(url)
-    .then(db => {
+    .then(client => {
+      const db = client.db(name)
       return db.collections()
         .then(collections => {
           const requests = collections.map(col => col.drop())
           return Promise.all(requests)
         })
-        .then(() => db.close())
+        .then(() => client.close())
     })
 }
 
@@ -169,6 +193,8 @@ module.exports = {
   start,
   stop,
   getUrl,
+  getUrlShort,
+  getDbName,
   load,
   clean,
   drop,
