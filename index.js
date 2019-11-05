@@ -164,6 +164,17 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
   })
 }
 
+/**
+ * @deprecated Since version 2.0.0. Use initDb(url, dbName, data) instead.
+ */
+function initDb(fullUrl, data) {
+  console.warn('Using full MongoDB url is deprecate. Separate URL and DB name.')
+  const splitUrl = fullUrl.split('/')
+  const shortUrl = splitUrl.slice(0, -1).join('/')
+  const dbName = splitUrl.slice(-1)[0]
+  initDb(shortUrl, dbName, data)
+}
+
 function initDb(url, name, data) {
   return client.connect(url)
     .then(client => {
@@ -174,6 +185,17 @@ function initDb(url, name, data) {
       })
       return Promise.all(requests).then(() => client.close())
     })
+}
+
+/**
+ * @deprecated Since version 2.0.0. Use dropDb(url, dbName) instead.
+ */
+function dropDb(fullUrl, data) {
+  console.warn('Using full MongoDB url is deprecate. Separate URL and DB name.')
+  const splitUrl = fullUrl.split('/')
+  const shortUrl = splitUrl.slice(0, -1).join('/')
+  const dbName = splitUrl.slice(-1)[0]
+  dropDb(shortUrl, dbName)
 }
 
 function dropDb(url, name) {
