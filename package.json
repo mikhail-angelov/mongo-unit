@@ -1,12 +1,12 @@
 {
   "name": "mongo-unit",
-  "version": "1.4.5",
+  "version": "1.5.0",
   "description": "mongo db for unit tests",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "test": "mocha test.js",
-    "test-basic": "mocha ./examples/basic.js",
+    "test-example": "mocha ./examples/test.it.js --delay",
     "release": "git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "repository": {
@@ -32,8 +32,8 @@
   "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
   "dependencies": {
     "debug": "^3.0.1",
-    "mongodb": "~2.2.31",
-    "mongodb-prebuilt": "~6.4.0",
+    "mongodb": "^3.3.3",
+    "mongodb-prebuilt": "~6.5.0",
     "portfinder": "^1.0.10",
     "ps-node": "^0.1.4"
   },
@@ -41,6 +41,6 @@
     "chai": "^3.5.0",
     "co": "^4.6.0",
     "mocha": "^3.2.0",
-    "mongoose": "^4.7.6"
+    "mongoose": "^5.7.7"
   }
 }

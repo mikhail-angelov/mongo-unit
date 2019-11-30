@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 const Debug = require('debug')
 const portfinder = require('portfinder')
-const client = require('mongodb').MongoClient
+const MongoClient = require('mongodb').MongoClient
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -16,28 +16,32 @@ const defaultMongoOpts = {
 }
 
 var mongodHelper
-var dbUrl
+var dbUrl = null
+var client
+var dbName
 
 function runMogo(opts, port) {
   const MongodHelper = require('mongodb-prebuilt').MongodHelper
   opts.port = port
-  mongodHelper = new MongodHelper([
-    '--port', port, 
-    '--dbpath', opts.dbpath, 
-    '--storageEngine', 'ephemeralForTest'
-  ], {
+  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath, '--storageEngine', 'ephemeralForTest'], {
     version: opts.version,
-  });
-  return mongodHelper.run()
+  })
+  return mongodHelper
+    .run()
     .then(() => {
-      dbUrl = 'mongodb://localhost:' + port + '/' + opts.dbName
+      dbName = opts.dbName
+      dbUrl = 'mongodb://localhost:' + port + '/' + dbName
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
+    })
+    .then(url => MongoClient.connect(url))
+    .then(dbClient => {
+      client = dbClient
     })
 }
 
 function start(opts) {
-  const mongo_opts = Object.assign(defaultMongoOpts, (opts || {}))
+  const mongo_opts = Object.assign(defaultMongoOpts, opts || {})
   if (mongo_opts.verbose) {
     Debug.enable('mongo-unit')
     Debug.enable('*')
@@ -56,9 +60,11 @@ function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
 function stop() {
-  mongodHelper && mongodHelper.mongoBin.childProcess.kill()
-  dbUrl = null;
-  return delay(100) //this is small delay to make sure kill signal is sent
+  return client.close(true).then(() => {
+    mongodHelper && mongodHelper.mongoBin.childProcess.kill()
+    dbUrl = null
+    return delay(100) //this is small delay to make sure kill signal is sent
+  })
 }
 
 function getUrl() {
@@ -70,99 +76,93 @@ function getUrl() {
 }
 
 function load(data) {
-  return client.connect(getUrl())
-    .then(db => {
-      const queries = Object.keys(data).map(col => {
-        const collection = db.collection(col)
-        return collection.insert(data[col])
-      })
-      return Promise.all(queries).then(() => db.close())
-    })
+  const db = client.db(dbName)
+  const queries = Object.keys(data).map(col => {
+    const collection = db.collection(col)
+    return collection.insertMany(data[col])
+  })
+  return Promise.all(queries)
 }
 
 function clean(data) {
-  return client.connect(getUrl())
-    .then(db => {
-      const queries = Object.keys(data).map(col => {
-        const collection = db.collection(col)
-        return collection.drop()
-      })
-      return Promise.all(queries).then(() => db.close())
-    })
+  const db = client.db(dbName)
+  const queries = Object.keys(data).map(col => {
+    const collection = db.collection(col)
+    return collection.drop()
+  })
+  return Promise.all(queries)
 }
 
 function drop() {
-  return client.connect(getUrl())
-    .then(db => db.dropDatabase().then(() => db.close()))
+  return client.db(dbName).dropDatabase()
 }
 
 function getFreePort(possiblePort) {
   portfinder.basePort = possiblePort
-  return new Promise((resolve, reject) => portfinder.getPort((err, port) => {
-    if (err) {
-      debug(`cannot get free port: ${err}`)
-      reject(err)
-    } else {
-      resolve(port)
-    }
-  }))
+  return new Promise((resolve, reject) =>
+    portfinder.getPort((err, port) => {
+      if (err) {
+        debug(`cannot get free port: ${err}`)
+        reject(err)
+      } else {
+        resolve(port)
+      }
+    })
+  )
 }
 
 function makeSureTempDirExist(dir) {
   try {
-    fs.mkdirSync(dir);
+    fs.mkdirSync(dir)
   } catch (e) {
-    if (e.code !== "EEXIST") {
+    if (e.code !== 'EEXIST') {
       console.log('cannot create db folder', dir, e)
-      throw e;
+      throw e
     }
   }
 }
 
 function makeSureOtherMongoProcessesKilled(dataFolder) {
   return new Promise((resolve, reject) => {
-    ps.lookup({
-      psargs: ['-A'],
-      command: 'mongod',
-      arguments: dataFolder
-    }, (err, resultList) => {
-      if (err) {
-        console.log('ps-node error', err)
-        return reject(err)
-      }
-
-      resultList.forEach(process => {
-        if (process) {
-          console.log('KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments)
-          ps.kill(process.pid)
+    ps.lookup(
+      {
+        psargs: ['-A'],
+        command: 'mongod',
+        arguments: dataFolder,
+      },
+      (err, resultList) => {
+        if (err) {
+          console.log('ps-node error', err)
+          return reject(err)
         }
-      });
-      return resolve()
-    })
+
+        resultList.forEach(process => {
+          if (process) {
+            console.log('KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments)
+            ps.kill(process.pid)
+          }
+        })
+        return resolve()
+      }
+    )
   })
 }
 
 function initDb(url, data) {
-  return client.connect(url)
-    .then(db => {
-      const requests = Object.keys(data).map(col => {
-        const collection = db.collection(col)
-        return collection.insert(data[col])
-      })
-      return Promise.all(requests).then(() => db.close())
-    })
+  const db = client.db(dbName)
+  const requests = Object.keys(data).map(col => {
+    const collection = db.collection(col)
+    return collection.insertMany(data[col])
+  })
+  return Promise.all(requests)
 }
 
 function dropDb(url) {
-  return client.connect(url)
-    .then(db => {
-      return db.collections()
-        .then(collections => {
-          const requests = collections.map(col => col.drop())
-          return Promise.all(requests)
-        })
-        .then(() => db.close())
-    })
+  const db = client.db(dbName)
+  return db.collections().then(collections => {
+    const requests = collections.map(col => col.drop())
+    return Promise.all(requests)
+  })
 }
 
 module.exports = {

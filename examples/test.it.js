@@ -1,11 +1,24 @@
 const expect = require('chai').expect
-const mongoose = require('mongoose')
 const mongoUnit = require('../index')
-const service = require('./app/service')
 const testMongoUrl = process.env.MONGO_URL
+const testData = require('./fixtures/testData.json')
+
+let service 
+mongoUnit.start({dbName:'example'}).then(() => {
+  run() // this line start mocha tests
+})
+
+after(async () => {
+  const client = service.getClient()
+  await client.disconnect()
+  await mongoUnit.stop()
+})
 
 describe('service', () => {
-  const testData = require('./fixtures/testData.json')
+  before(() =>{
+    // create it after DB is started
+    service = require('./app/service')
+  })
   beforeEach(() => mongoUnit.initDb(testMongoUrl, testData))
   afterEach(() => mongoUnit.drop())
 

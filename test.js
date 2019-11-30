@@ -4,6 +4,8 @@ const expect = require('chai').expect
 const MongoClient = require('mongodb').MongoClient
 const co = require('co')
 
+const DB_NAME = 'test'
+
 describe('mongo-unit', function () {
   this.timeout(10000000)
   const mongoUnit = require('./index')
@@ -12,7 +14,7 @@ describe('mongo-unit', function () {
     col2: [{rec: 1}, {rec: 2}]
   }
 
-  before(() => mongoUnit.start({}))
+  before(() => mongoUnit.start({dbName: DB_NAME}))
 
   after(() => mongoUnit.stop())
 
@@ -26,20 +28,23 @@ describe('mongo-unit', function () {
   })
 
   it('should connect to db and CRUD docs', () => co(function*(){
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrl())
+    const db = client.db(DB_NAME)
     const collection = db.collection('test')
-    yield collection.insert({doc: 1})
+    yield collection.insertOne({doc: 1})
     let results = yield collection.find().toArray()
     expect(results.length).to.equal(1)
     expect(results[0].doc).to.equal(1)
-    yield collection.remove({doc: 1})
+    yield collection.removeOne({doc: 1})
     results = yield collection.find().toArray()
     expect(results.length).to.equal(0)
+    yield client.close()
   }))
 
   it('should load collection data', () => co(function*(){
     yield mongoUnit.load(testData)
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrl())
+    const db = client.db(DB_NAME)
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
@@ -48,39 +53,46 @@ describe('mongo-unit', function () {
     results = yield collection2.find().toArray()
     expect(results.length).to.equal(2)
     expect(results[1].rec).to.equal(2)
+    yield client.close()
   }))
 
   it('should clean collection data', () => co(function*(){
     yield mongoUnit.load(testData)
     yield mongoUnit.clean(testData)
-    const db = yield MongoClient.connect(mongoUnit.getUrl())
+    const client = yield MongoClient.connect(mongoUnit.getUrl())
+    const db = client.db(DB_NAME)
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
     expect(results.length).to.equal(0)
     results = yield collection2.find().toArray()
     expect(results.length).to.equal(0)
+    yield client.close()
   }))
 
   it('should init DB data for given URL', () => co(function*(){
     const url = mongoUnit.getUrl()
     yield mongoUnit.initDb(url, testData)
-    const db = yield MongoClient.connect(url)
+    const client = yield MongoClient.connect(mongoUnit.getUrl())
+    const db = client.db(DB_NAME)
     const collection1 = db.collection('col1')
     const collection2 = db.collection('col2')
     let results = yield collection1.find().toArray()
     expect(results.length).to.equal(2)
     results = yield collection2.find().toArray()
     expect(results.length).to.equal(2)
+    yield client.close()
   }))
 
   it('should dropDb DB data for given URL', () => co(function*(){
     const url = mongoUnit.getUrl()
     yield mongoUnit.initDb(url, testData)
     yield mongoUnit.dropDb(url)
-    const db = yield MongoClient.connect(url)
+    const client = yield MongoClient.connect(mongoUnit.getUrl())
+    const db = client.db(DB_NAME)
     const collections = yield db.listCollections().toArray()
     expect(collections.length).to.equal(0)
+    yield client.close()
   }))
 
 //   it('should list mongo',(done)=>{
@@ -116,7 +128,7 @@ describe('mongo-unit', function () {
                 return mongoUnit.start();
             })
             .then(url => {
-                expect(url).to.equal(mongoUnit.getUrl());
+                expect('mongodb://localhost:27017/test').to.equal(mongoUnit.getUrl());
             });
     });
 })
