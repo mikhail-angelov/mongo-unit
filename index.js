@@ -34,7 +34,7 @@ function runMogo(opts, port) {
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
     })
-    .then(url => MongoClient.connect(url))
+    .then(url => MongoClient.connect(url, { useUnifiedTopology: true }))
     .then(dbClient => {
       client = dbClient
     })
