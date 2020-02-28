@@ -49,6 +49,7 @@ function runMongo(opts, port) {
     .then(url => MongoClient.connect(url, { useUnifiedTopology: true }))
     .then(dbClient => {
       client = dbClient
+      return dbUrl
     })
     .catch(err => console.error(err))
 }
