@@ -3,8 +3,8 @@ const mongoUnit = require('../index')
 const testMongoUrl = process.env.MONGO_URL
 const testData = require('./fixtures/testData.json')
 
-let service 
-mongoUnit.start({dbName:'example'}).then(() => {
+let service
+mongoUnit.start({ dbName: 'example' }).then(() => {
   run() // this line start mocha tests
 })
 
@@ -15,7 +15,7 @@ after(async () => {
 })
 
 describe('service', () => {
-  before(() =>{
+  before(() => {
     // create it after DB is started
     service = require('./app/service')
   })
@@ -23,15 +23,15 @@ describe('service', () => {
   afterEach(() => mongoUnit.drop())
 
   it('should find all tasks', () => {
-    return service.getTasks()
-      .then(tasks => {
-        expect(tasks.length).to.equal(1)
-        expect(tasks[0].name).to.equal('test')
-      })
+    return service.getTasks().then(tasks => {
+      expect(tasks.length).to.equal(1)
+      expect(tasks[0].name).to.equal('test')
+    })
   })
 
   it('should create new task', () => {
-    return service.addTask({ name: 'next', completed: false })
+    return service
+      .addTask({ name: 'next', completed: false })
       .then(task => {
         expect(task.name).to.equal('next')
         expect(task.completed).to.equal(false)
@@ -43,7 +43,8 @@ describe('service', () => {
       })
   })
   it('should remove task', () => {
-    return service.getTasks()
+    return service
+      .getTasks()
       .then(tasks => tasks[0]._id)
       .then(taskId => service.deleteTask(taskId))
       .then(() => service.getTasks())

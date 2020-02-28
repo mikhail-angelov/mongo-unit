@@ -9,36 +9,36 @@ const ui = {
   remove: '.task .remove',
   name: '#name',
   date: '#date',
-  addTask: '#addTask'
+  addTask: '#addTask',
 }
 describe('Tasks', () => {
-
-  beforeEach(function () {
-    return mongoUnit.initDb(testMongoUrl, DATA)
+  beforeEach(function() {
+    return mongoUnit
+      .initDb(testMongoUrl, DATA)
       .then(() => this.browser.url('http://localhost:3000'))
   })
 
   afterEach(() => mongoUnit.dropDb(testMongoUrl))
 
-  it('should display list of tasks', function () {
+  it('should display list of tasks', function() {
     const browser = this.browser
-    return co(function* () {
+    return co(function*() {
       const tasks = yield browser.elements(ui.task)
       expect(tasks.length, 1)
     })
   })
-  it('should create task', function () {
+  it('should create task', function() {
     const browser = this.browser
-    return co(function* () {
+    return co(function*() {
       yield browser.element(ui.name).setValue('test')
       yield browser.element(ui.addTask).click()
       const tasks = yield browser.elements(ui.task)
       expect(tasks.length, 2)
     })
   })
-  it('should remove task', function () {
+  it('should remove task', function() {
     const browser = this.browser
-    return co(function* () {
+    return co(function*() {
       yield browser.element(ui.remove).click()
       const tasks = yield browser.elements(ui.task)
       expect(tasks.length, 0)

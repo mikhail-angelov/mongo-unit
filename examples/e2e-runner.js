@@ -10,9 +10,7 @@ process.env.MARLEY_CHAT_SERVER_PORT = 3005
 process.env.NODE_ENV = 'development'
 process.env.MARLEY_LOGGER_LEVEL = 'debug'
 const hermioneOpts = {
-  reporters: [
-    'flat'
-  ],
+  reporters: ['flat'],
 }
 // hermioneOpts.grep = /should create Claim/
 
@@ -28,19 +26,18 @@ seleniumInstall()
   })
   .then(delay(1000))
   .then(() => hermione.run('', hermioneOpts))
-  .then((success) => {
+  .then(success => {
     console.log('e2e tests done', success)
     process.exit(success ? 0 : 1)
   })
-  .catch((e) => {
+  .catch(e => {
     console.log('e2e test execution error', e)
     process.exit(1)
   })
 
-
 function seleniumInstall() {
   return new Promise((resolve, reject) => {
-    selenium.install(seleniumInstallConfig, (err) => {
+    selenium.install(seleniumInstallConfig, err => {
       if (err) {
         console.log('selenium intsll error:', err)
         reject(err)
