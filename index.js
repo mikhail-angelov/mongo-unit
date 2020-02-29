@@ -2,6 +2,7 @@
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const MongoClient = require('mongodb').MongoClient
+const { MongoMemoryServer } = require('mongodb-memory-server')
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -15,21 +16,30 @@ const defaultMongoOpts = {
   version: 'latest',
 }
 
-var mongodHelper
-var dbUrl = null
-var client
-var dbName
+let mongod = null
+let dbUrl = null
+let client
+let dbName
 
-function runMogo(opts, port) {
-  const MongodHelper = require('mongodb-prebuilt').MongodHelper
-  opts.port = port
-  mongodHelper = new MongodHelper(['--port', port, '--dbpath', opts.dbpath, '--storageEngine', 'ephemeralForTest'], {
-    version: opts.version,
+function runMongo(opts, port) {
+  mongod = new MongoMemoryServer({
+    instance: {
+      port: port,
+      dbPath: opts.dbpath,
+      dbName: opts.dbName,
+      storageEngine: 'ephemeralForTest',
+    },
+    binary: {
+      version: opts.version,
+    },
+    autoStart: false,
   })
-  return mongodHelper
-    .run()
+  return mongod
+    .start()
     .then(() => {
-      dbName = opts.dbName
+      return mongod.getDbName()
+    })
+    .then(dbName => {
       dbUrl = 'mongodb://localhost:' + port + '/' + dbName
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
@@ -37,7 +47,9 @@ function runMogo(opts, port) {
     .then(url => MongoClient.connect(url, { useUnifiedTopology: true }))
     .then(dbClient => {
       client = dbClient
+      return dbUrl
     })
+    .catch(err => console.error(err))
 }
 
 function start(opts) {
@@ -52,19 +64,23 @@ function start(opts) {
     makeSureTempDirExist(mongo_opts.dbpath)
     return makeSureOtherMongoProcessesKilled(mongo_opts.dbpath)
       .then(() => getFreePort(mongo_opts.port))
-      .then(port => runMogo(mongo_opts, port))
+      .then(port => runMongo(mongo_opts, port))
   }
 }
 
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
+
 function stop() {
-  return client.close(true).then(() => {
-    mongodHelper && mongodHelper.mongoBin.childProcess.kill()
-    dbUrl = null
-    return delay(100) //this is small delay to make sure kill signal is sent
-  })
+  return client
+    .close(true)
+    .then(() => mongod.stop())
+    .then(() => {
+      // mongodHelper && mongodHelper.mongoBin.childProcess.kill()
+      dbUrl = null
+      return delay(100) //this is small delay to make sure kill signal is sent
+    })
 }
 
 function getUrl() {
@@ -138,7 +154,12 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 
         resultList.forEach(process => {
           if (process) {
-            console.log('KILL PID: %s, COMMAND: %s, ARGUMENTS: %s', process.pid, process.command, process.arguments)
+            console.log(
+              'KILL PID: %s, COMMAND: %s, ARGUMENTS: %s',
+              process.pid,
+              process.command,
+              process.arguments
+            )
             ps.kill(process.pid)
           }
         })
