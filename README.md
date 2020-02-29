@@ -1,7 +1,7 @@
 # mongo-unit
 
 This library is done to simplify creation of integration tests for node.js application with Mongo DB.
-I starts local mongodb process using [mongodb-prebuilt](https://github.com/winfinit/mongodb-prebuilt) library, 
+I starts local mongodb process using [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) library, 
 and it work in "InMemory" mode, which improve performance of your tests.
 
 ### How to use it
@@ -125,7 +125,7 @@ I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very
 > There is alternative library for mocking Mongo: [mockgoose](https://github.com/mockgoose/mockgoose)
   
 ## Requirements
-It works on Node.js 8+
+It works on Node.js 10+
 
 ## Installation
 `npm install -D mongo-unit`
@@ -134,12 +134,11 @@ It works on Node.js 8+
 
 ### `start(opts)`
 It starts mongod on one of available port and returns Promise with URL to connect to this db
-`opts` is optional params, you can specify some command line params for mongod 
-(more about it in documentation for [mongodb-prebuilt](https://github.com/winfinit/mongodb-prebuilt))
+`opts` is optional params, you can specify some command line params for mongod
  `opts.port` - preferable mongo db port, default: `27017`
  `opts.dbName` - name of test db, default: `test`
  `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
- `opts.verbose` - enable debug informaton for mongodb-prebuilt, default: `false`
+ `opts.verbose` - enable debug logs, default: `false`
 
 ### `stop()`
 It stops mongod process
