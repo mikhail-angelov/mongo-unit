@@ -7,7 +7,9 @@
   "scripts": {
     "test": "mocha test.js",
     "test-example": "mocha ./examples/test.it.js --delay",
-    "release": "git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+    "test-format": "prettier --check '**/*.{js,json}'",
+    "release": "git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "format": "prettier --write '**/*.{js,json}'"
   },
   "repository": {
     "type": "git",
@@ -33,14 +35,15 @@
   "dependencies": {
     "debug": "^3.0.1",
     "mongodb": "^3.3.3",
-    "mongodb-prebuilt": "~6.5.0",
+    "mongodb-memory-server": "^6.3.1",
     "portfinder": "^1.0.10",
     "ps-node": "^0.1.4"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "co": "^4.6.0",
-    "mocha": "^3.2.0",
-    "mongoose": "^5.7.7"
+    "mocha": "^7.1.0",
+    "mongoose": "^5.7.7",
+    "prettier": "^1.19.1"
   }
 }
