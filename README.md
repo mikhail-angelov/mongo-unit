@@ -133,12 +133,18 @@ It works on Node.js 10+
 ## API
 
 ### `start(opts)`
-It starts mongod on one of available port and returns Promise with URL to connect to this db
-`opts` is optional params, you can specify some command line params for mongod
- `opts.port` - preferable mongo db port, default: `27017`
- `opts.dbName` - name of test db, default: `test`
- `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
- `opts.verbose` - enable debug logs, default: `false`
+It starts mongod on one of available port and returns Promise with URL to connect to this db.
+`opts` is optional params, you can specify some command line params for mongod:
+
+*  `opts.port` - preferable mongo db port, default: `27017`
+*  `opts.dbName` - name of test db, default: `test`
+*  `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
+*  `opts.verbose` - enable debug logs, default: `false`
+*  `opts.version` - specify which version of mongo to download. e.g. `version=v3.6`
+
+[mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) can also be configured via environment variables.
+ For instance, `export MONGOMS_DEBUG=1`will activate debug logging in the memory server. See their docs for more information.
+
 
 ### `stop()`
 It stops mongod process
