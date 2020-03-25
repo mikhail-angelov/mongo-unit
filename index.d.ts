@@ -23,5 +23,6 @@ declare module 'mongo-unit' {
         dbName: string;
         dbpath: string;
         verbose: boolean;
+        version: string;
     }
 }
