@@ -130,6 +130,10 @@ It works on Node.js 10+
 ## Installation
 `npm install -D mongo-unit`
 
+## Run test in docker example
+`docker build -t mongo-unit .`
+`docker run -it mongo-unit`
+
 ## API
 
 ### `start(opts)`

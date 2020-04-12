@@ -13,7 +13,6 @@ const defaultMongoOpts = {
   dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
-  version: 'latest',
 }
 
 let mongod = null
@@ -22,18 +21,19 @@ let client
 let dbName
 
 function runMongo(opts, port) {
-  mongod = new MongoMemoryServer({
+  const options = {
     instance: {
       port: port,
       dbPath: opts.dbpath,
       dbName: opts.dbName,
       storageEngine: 'ephemeralForTest',
     },
-    binary: {
-      version: opts.version,
-    },
     autoStart: false,
-  })
+  }
+  if (opts.version) {
+    options.binary = { version: opts.version }
+  }
+  mongod = new MongoMemoryServer(options)
   return mongod
     .start()
     .then(() => {
