@@ -37,10 +37,7 @@ function runMongo(opts, port) {
   return mongod
     .start()
     .then(() => {
-      return mongod.getDbName()
-    })
-    .then(dbName => {
-      dbUrl = 'mongodb://localhost:' + port + '/' + dbName
+      dbUrl = mongod.getUri(options.instance.dbName)
       debug(`mongo is started on ${dbUrl}`)
       return dbUrl
     })
