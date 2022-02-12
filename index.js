@@ -20,7 +20,7 @@ let dbUrl = null
 let client
 let dbName
 
-function runMongo(opts, port) {
+async function runMongo(opts, port) {
   const options = {
     instance: {
       port: port,
@@ -33,23 +33,10 @@ function runMongo(opts, port) {
   if (opts.version) {
     options.binary = { version: opts.version }
   }
-  mongod = new MongoMemoryServer(options)
-  return mongod
-    .start()
-    .then(() => {
-      return mongod.getDbName()
-    })
-    .then(dbName => {
-      dbUrl = 'mongodb://localhost:' + port + '/' + dbName
-      debug(`mongo is started on ${dbUrl}`)
-      return dbUrl
-    })
-    .then(url => MongoClient.connect(url, { useUnifiedTopology: true }))
-    .then(dbClient => {
-      client = dbClient
-      return dbUrl
-    })
-    .catch(err => console.error(err))
+  mongod = await MongoMemoryServer.create(options)
+  dbUrl = mongod.getUri()
+  client = await MongoClient.connect(dbUrl, { useUnifiedTopology: true })
+  return dbUrl
 }
 
 function start(opts) {
@@ -72,15 +59,11 @@ function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
 
-function stop() {
-  return client
-    .close(true)
-    .then(() => mongod.stop())
-    .then(() => {
-      // mongodHelper && mongodHelper.mongoBin.childProcess.kill()
-      dbUrl = null
-      return delay(100) //this is small delay to make sure kill signal is sent
-    })
+async function stop() {
+  await  client.close(true)
+  await mongod.stop()
+  dbUrl = null
+  await delay(100) //this is small delay to make sure kill signal is sent
 }
 
 function getUrl() {
@@ -169,7 +152,7 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
   })
 }
 
-function initDb(url, data) {
+function initDb(data) {
   const db = client.db(dbName)
   const requests = Object.keys(data).map(col => {
     const collection = db.collection(col)
@@ -178,7 +161,7 @@ function initDb(url, data) {
   return Promise.all(requests)
 }
 
-function dropDb(url) {
+function dropDb() {
   const db = client.db(dbName)
   return db.collections().then(collections => {
     const requests = collections.map(col => col.drop())
