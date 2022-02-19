@@ -30,7 +30,6 @@ async function runMongo(opts, port) {
     options.binary = { version: opts.version }
   }
 
-  let startPromise
   if (opts.useReplicaSet) {
     options.instanceOpts = [
       {
@@ -45,9 +44,8 @@ async function runMongo(opts, port) {
       storageEngine: 'wiredTiger'
     }
 
-    mongod = new MongoMemoryReplSet(options)
-
-    startPromise = mongod.start().then(() => mongod.waitUntilRunning())
+    mongod = await MongoMemoryReplSet.create(options)
+    await mongod.waitUntilRunning()
   } else {
     options.instance = {
       port: port,
@@ -55,11 +53,9 @@ async function runMongo(opts, port) {
       dbName: opts.dbName,
       storageEngine: 'ephemeralForTest',
     }
-
-    mongod = new MongoMemoryServer(options)
-    startPromise = mongod.start()
+    mongod = await MongoMemoryServer.create(options)
+    await mongod.ensureInstance()
   }
-  mongod = await MongoMemoryServer.create(options)
   dbUrl = mongod.getUri()
   client = await MongoClient.connect(dbUrl, { useUnifiedTopology: true })
   return dbUrl
@@ -87,7 +83,7 @@ function delay(time) {
 
 async function stop() {
   await  client.close(true)
-  await mongod.stop()
+  await mongod.stop(true)
   dbUrl = null
   await delay(100) //this is small delay to make sure kill signal is sent
 }
@@ -138,13 +134,13 @@ function getFreePort(possiblePort) {
 
 function makeSureTempDirExist(dir, useReplicaSet) {
   try {
-    if (useReplicaSet) {
+    if (fs.existsSync(dir)) {
       fs.rmdirSync(dir, { recursive: true })
     }
     fs.mkdirSync(dir)
   } catch (e) {
+    console.log('cannot create db folder', dir, e)
     if (e.code !== 'EEXIST') {
-      console.log('cannot create db folder', dir, e)
       throw e
     }
   }

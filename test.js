@@ -6,7 +6,7 @@ const co = require('co')
 
 const DB_NAME = 'test'
 
-describe('mongo-unit', function() {
+describe('mongo-unit', function () {
   this.timeout(10000000)
   const mongoUnit = require('./index')
   const testData = {
@@ -27,7 +27,7 @@ describe('mongo-unit', function() {
   })
 
   it('should connect to db and CRUD docs', () =>
-    co(function*() {
+    co(function* () {
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
         useUnifiedTopology: true,
       })
@@ -44,7 +44,7 @@ describe('mongo-unit', function() {
     }))
 
   it('should load collection data', () =>
-    co(function*() {
+    co(function* () {
       yield mongoUnit.load(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
         useUnifiedTopology: true,
@@ -62,7 +62,7 @@ describe('mongo-unit', function() {
     }))
 
   it('should clean collection data', () =>
-    co(function*() {
+    co(function* () {
       yield mongoUnit.load(testData)
       yield mongoUnit.clean(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
@@ -79,7 +79,7 @@ describe('mongo-unit', function() {
     }))
 
   it('should init DB data for given URL', () =>
-    co(function*() {
+    co(function* () {
       const url = mongoUnit.getUrl()
       yield mongoUnit.initDb(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
@@ -96,7 +96,7 @@ describe('mongo-unit', function() {
     }))
 
   it('should dropDb DB data for given URL', () =>
-    co(function*() {
+    co(function* () {
       yield mongoUnit.initDb(testData)
       yield mongoUnit.dropDb()
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
@@ -146,5 +146,27 @@ describe('mongo-unit', function() {
           useUnifiedTopology: true,
         })
       })
+  })
+  it('should work with mongo replica set', async () => {
+    await mongoUnit.stop()
+    expect(mongoUnit.getUrl).to.throw(Error)
+    // test replica set
+    await mongoUnit.start({ dbName: DB_NAME, useReplicaSet: true })
+
+    await mongoUnit.load(testData)
+    const client = await MongoClient.connect(mongoUnit.getUrl(), {
+      useUnifiedTopology: true,
+    })
+    const db = client.db(DB_NAME)
+    const collection1 = db.collection('col1')
+    let results = await collection1.find().toArray()
+    expect(results.length).to.equal(2)
+    await client.close()
+
+    //stop replica set
+    await mongoUnit.stop()
+
+    //start again
+    await mongoUnit.start({ dbName: DB_NAME })
   })
 })
