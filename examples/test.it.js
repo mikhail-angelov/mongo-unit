@@ -5,6 +5,7 @@ const testData = require('./fixtures/testData.json')
 
 let service
 mongoUnit.start({ dbName: 'example' }).then(() => {
+  process.env.MONGO_URL = mongoUnit.getUrl()
   run() // this line start mocha tests
 })
 
@@ -19,8 +20,8 @@ describe('service', () => {
     // create it after DB is started
     service = require('./app/service')
   })
-  beforeEach(() => mongoUnit.initDb(testMongoUrl, testData))
-  afterEach(() => mongoUnit.drop())
+  beforeEach(() => mongoUnit.initDb(testData))
+  afterEach(() => mongoUnit.dropDb())
 
   it('should find all tasks', () => {
     return service.getTasks().then(tasks => {

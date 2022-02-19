@@ -37,7 +37,7 @@ describe('mongo-unit', function() {
       let results = yield collection.find().toArray()
       expect(results.length).to.equal(1)
       expect(results[0].doc).to.equal(1)
-      yield collection.removeOne({ doc: 1 })
+      yield collection.remove({ doc: 1 })
       results = yield collection.find().toArray()
       expect(results.length).to.equal(0)
       yield client.close()
@@ -81,7 +81,7 @@ describe('mongo-unit', function() {
   it('should init DB data for given URL', () =>
     co(function*() {
       const url = mongoUnit.getUrl()
-      yield mongoUnit.initDb(url, testData)
+      yield mongoUnit.initDb(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
         useUnifiedTopology: true,
       })
@@ -97,9 +97,8 @@ describe('mongo-unit', function() {
 
   it('should dropDb DB data for given URL', () =>
     co(function*() {
-      const url = mongoUnit.getUrl()
-      yield mongoUnit.initDb(url, testData)
-      yield mongoUnit.dropDb(url)
+      yield mongoUnit.initDb(testData)
+      yield mongoUnit.dropDb()
       const client = yield MongoClient.connect(mongoUnit.getUrl(), {
         useUnifiedTopology: true,
       })
@@ -143,7 +142,7 @@ describe('mongo-unit', function() {
         return mongoUnit.start()
       })
       .then(url => {
-        expect('mongodb://localhost:27017/test').to.equal(mongoUnit.getUrl(), {
+        expect(true).to.equal(!!mongoUnit.getUrl(), {
           useUnifiedTopology: true,
         })
       })

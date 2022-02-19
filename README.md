@@ -125,7 +125,7 @@ I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very
 > There is alternative library for mocking Mongo: [mockgoose](https://github.com/mockgoose/mockgoose)
   
 ## Requirements
-It works on Node.js 10+
+It works on Node.js 12+
 
 ## Installation
 `npm install -D mongo-unit`
@@ -179,10 +179,10 @@ Clear collections based on given data (data format is the same), returns Promise
 ### `drop()`
 Drops test DB, returns Promise.
 
-### `initDb(url, data)`
-helper function, load db data into mongo (url)
+### `initDb(data)`
+helper function, load db data into mongo
 
-### `dropDb(url)`
-helper function, clear all db data from mongo (url)
+### `dropDb()`
+helper function, clear all db data from mongo
 
 
