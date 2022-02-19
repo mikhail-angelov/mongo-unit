@@ -2,7 +2,7 @@
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const MongoClient = require('mongodb').MongoClient
-const { MongoMemoryServer } = require('mongodb-memory-server')
+const { MongoMemoryServer, MongoMemoryReplSet } = require('mongodb-memory-server')
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -13,6 +13,7 @@ const defaultMongoOpts = {
   dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
+  useReplicaSet: false
 }
 
 let mongod = null
@@ -22,16 +23,41 @@ let dbName
 
 async function runMongo(opts, port) {
   const options = {
-    instance: {
+    autoStart: false
+  }
+
+  if (opts.version) {
+    options.binary = { version: opts.version }
+  }
+
+  let startPromise
+  if (opts.useReplicaSet) {
+    options.instanceOpts = [
+      {
+        port: port,
+        dbPath: opts.dbpath,
+        storageEngine: 'wiredTiger',
+      }
+    ]
+
+    options.replSet = {
+      dbName: opts.dbName,
+      storageEngine: 'wiredTiger'
+    }
+
+    mongod = new MongoMemoryReplSet(options)
+
+    startPromise = mongod.start().then(() => mongod.waitUntilRunning())
+  } else {
+    options.instance = {
       port: port,
       dbPath: opts.dbpath,
       dbName: opts.dbName,
       storageEngine: 'ephemeralForTest',
-    },
-    autoStart: false,
-  }
-  if (opts.version) {
-    options.binary = { version: opts.version }
+    }
+
+    mongod = new MongoMemoryServer(options)
+    startPromise = mongod.start()
   }
   mongod = await MongoMemoryServer.create(options)
   dbUrl = mongod.getUri()
@@ -48,7 +74,7 @@ function start(opts) {
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
-    makeSureTempDirExist(mongo_opts.dbpath)
+    makeSureTempDirExist(mongo_opts.dbpath, mongo_opts.useReplicaSet)
     return makeSureOtherMongoProcessesKilled(mongo_opts.dbpath)
       .then(() => getFreePort(mongo_opts.port))
       .then(port => runMongo(mongo_opts, port))
@@ -110,8 +136,11 @@ function getFreePort(possiblePort) {
   )
 }
 
-function makeSureTempDirExist(dir) {
+function makeSureTempDirExist(dir, useReplicaSet) {
   try {
+    if (useReplicaSet) {
+      fs.rmdirSync(dir, { recursive: true })
+    }
     fs.mkdirSync(dir)
   } catch (e) {
     if (e.code !== 'EEXIST') {
