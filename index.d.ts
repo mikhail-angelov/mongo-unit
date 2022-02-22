@@ -24,5 +24,6 @@ declare module 'mongo-unit' {
         dbpath: string;
         verbose: boolean;
         version: string;
+        useReplicaSet?: boolean;
     }
 }
