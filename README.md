@@ -59,7 +59,7 @@ module.exports = {
   Task: mongoose.model('task', taskSchema),
 }
 ```
-Test data
+Test data ('data.json' if JSON)
 ```json
 {
   "users": [
@@ -84,12 +84,28 @@ Test data
   ]
 }
 ```
+...or Test data ('data.js' -- can be Javascript if you need to use ObjectId, for example)
+```javascript
+const mongodb = require('mongodb');
+
+module.exports = {
+    users: [
+        {_id: mongodb.ObjectId('56d9bf92f9be48771d6fe5b1'), name: 'test'},
+        {_id: mongodb.ObjectId('56d9bf92f9be48771d6fe5b2'), name: 'John'},
+    ],
+    tasks: [
+        {userId: mongodb.ObjectId('56d9bf92f9be48771d6fe5b1'), task: 'do stuff'},
+        {userId: mongodb.ObjectId('56d9bf92f9be48771d6fe5b1'), task: 'fix stuff'},
+    ],
+}
+```
+
 Mocha test
 ```javascript
 //dao.spec.js
 const {expect} = require('chai')
 const mongoUnit = require('mongo-unit')
-const testData = require('./data.json')
+const testData = require('./data.json') /* or require('./data.js') if javascript */
 const daoUT = require('./dao')
 describe('dao', ()=>{
   
