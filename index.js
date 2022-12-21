@@ -67,6 +67,7 @@ function start(opts) {
     Debug.enable('mongo-unit')
     Debug.enable('*')
   }
+  dbName = mongo_opts.dbName;
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
