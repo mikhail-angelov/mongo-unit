@@ -136,7 +136,7 @@ function getFreePort(possiblePort) {
 function makeSureTempDirExist(dir, useReplicaSet) {
   try {
     if (fs.existsSync(dir)) {
-      fs.rmdirSync(dir, { recursive: true })
+      fs.rmSync(dir, { recursive: true })
     }
     fs.mkdirSync(dir)
   } catch (e) {
