@@ -121,8 +121,6 @@ describe('dao', ()=>{
 [![CircleCI](https://circleci.com/gh/mikhail-angelov/mongo-unit.svg?style=svg)](https://circleci.com/gh/mikhail-angelov/mongo-unit)
 
 I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very popular in java world.
-
-> There is alternative library for mocking Mongo: [mockgoose](https://github.com/mockgoose/mockgoose)
   
 ## Requirements
 It works on Node.js 12+
