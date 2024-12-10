@@ -1,7 +1,7 @@
 # mongo-unit
 
 This library is done to simplify creation of integration tests for node.js application with Mongo DB.
-I starts local mongodb process using [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) library, 
+I starts local mongodb process using [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) library,
 and it work in "InMemory" mode, which improve performance of your tests.
 
 ### How to use it
@@ -92,11 +92,11 @@ const mongoUnit = require('mongo-unit')
 const testData = require('./data.json')
 const daoUT = require('./dao')
 describe('dao', ()=>{
-  
+
     before(() => daoUT.init())
     beforeEach(() => mongoUnit.load(testData))
     afterEach(() => mongoUnit.drop())
-  
+
     it('should find all users', () => {
       return daoUT.User.find()
         .then(users => {
@@ -104,7 +104,7 @@ describe('dao', ()=>{
           expect(users[0].name).to.equal('test')
         })
     })
-  
+
     it('should find all tasks for user 1', () => {
       return daoUT.User.find()
         .then(users => users[0])
@@ -123,7 +123,7 @@ describe('dao', ()=>{
 I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very popular in java world.
 
 > There is alternative library for mocking Mongo: [mockgoose](https://github.com/mockgoose/mockgoose)
-  
+
 ## Requirements
 It works on Node.js 12+
 
@@ -146,6 +146,7 @@ It starts mongod on one of available port and returns Promise with URL to connec
 *  `opts.verbose` - enable debug logs, default: `false`
 *  `opts.version` - specify which version of mongo to download. e.g. `version=v3.6`
 *  `opts.useReplicateSet` - specify we want to start the memory server as a `MongoMemoryReplSet` needed to support transactions, default: `false`
+*  `opts.storageEngine` - specify the [Mongo storage engine](https://www.mongodb.com/docs/manual/core/storage-engines/) to use (e.g., `wiredTiger`); default: non-replica set `ephemeralForTest`, replica set `wiredTiger`. (Note that as of Mongo 7+, `ephemeralForTest` is no longer supported or allowed, so you will have to specify an option here.)
 
 [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) can also be configured via environment variables.
  For instance, `export MONGOMS_DEBUG=1`will activate debug logging in the memory server. See their docs for more information.
@@ -184,5 +185,3 @@ helper function, load db data into mongo
 
 ### `dropDb()`
 helper function, clear all db data from mongo
-
-
