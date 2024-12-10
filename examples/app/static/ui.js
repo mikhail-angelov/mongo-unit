@@ -1,14 +1,14 @@
 const { h, app } = hyperapp
 const actions = {
-  getTasks: value => (state, actions) =>
-    getTasks().then(tasks => actions.setTasks(tasks)),
-  setTasks: tasks => state => ({ tasks }),
-  addTask: value => (state, actions) =>
+  getTasks: (value) => (state, actions) =>
+    getTasks().then((tasks) => actions.setTasks(tasks)),
+  setTasks: (tasks) => (state) => ({ tasks }),
+  addTask: (value) => (state, actions) =>
     addTask(state.newTask).then(() => actions.getTasks()),
-  removeTask: taskId => (state, actions) =>
+  removeTask: (taskId) => (state, actions) =>
     removeTask(taskId).then(() => actions.getTasks()),
-  clearTask: value => state => ({ newTask: {} }),
-  newTaskChange: data => state => {
+  clearTask: (value) => (state) => ({ newTask: {} }),
+  newTaskChange: (data) => (state) => {
     const change = {}
     change[data.field] = data.value
     return { newTask: Object.assign(state.newTask, change) }
@@ -27,21 +27,21 @@ const Task = (task, actions) =>
   ])
 
 const view = (state, actions) => {
-  const tasks = state.tasks.map(task => Task(task, actions))
+  const tasks = state.tasks.map((task) => Task(task, actions))
   return h('div', { class: 'main', oncreate: actions.getTasks }, [
     h('div', {}, tasks),
     h('input', {
       id: 'name',
       type: 'text',
       value: state.newTask.name,
-      oninput: e =>
+      oninput: (e) =>
         actions.newTaskChange({ field: 'name', value: e.target.value }),
     }),
     h('input', {
       id: 'date',
       type: 'date',
       value: state.newTask.started,
-      oninput: e =>
+      oninput: (e) =>
         actions.newTaskChange({ field: 'started', value: e.target.value }),
     }),
     h('button', { id: 'addTask', onclick: () => actions.addTask() }, 'addTask'),
@@ -56,14 +56,14 @@ const view = (state, actions) => {
 const main = app({ tasks: [], newTask: {} }, actions, view, document.body)
 
 function getTasks() {
-  return fetch('/example').then(response => response.json())
+  return fetch('/example').then((response) => response.json())
 }
 function addTask(task) {
   return fetch('/example', {
     method: 'POST',
     body: JSON.stringify(task),
     headers: { 'Content-Type': 'application/json' },
-  }).then(response => response.json())
+  }).then((response) => response.json())
 }
 function removeTask(taskId) {
   return fetch(`/example/${taskId}`, {

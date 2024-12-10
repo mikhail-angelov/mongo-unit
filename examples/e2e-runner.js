@@ -17,7 +17,7 @@ const hermioneOpts = {
 seleniumInstall()
   .then(() => seleniumStart())
   .then(mongoUnit.start)
-  .then(testMongoUrl => {
+  .then((testMongoUrl) => {
     process.env.MONGO_URL = testMongoUrl
     console.log('mongo fake url', testMongoUrl)
   })
@@ -26,18 +26,18 @@ seleniumInstall()
   })
   .then(delay(1000))
   .then(() => hermione.run('', hermioneOpts))
-  .then(success => {
+  .then((success) => {
     console.log('e2e tests done', success)
     process.exit(success ? 0 : 1)
   })
-  .catch(e => {
+  .catch((e) => {
     console.log('e2e test execution error', e)
     process.exit(1)
   })
 
 function seleniumInstall() {
   return new Promise((resolve, reject) => {
-    selenium.install(seleniumInstallConfig, err => {
+    selenium.install(seleniumInstallConfig, (err) => {
       if (err) {
         console.log('selenium intsll error:', err)
         reject(err)
@@ -67,5 +67,5 @@ function seleniumStart() {
 }
 
 function delay(timeout) {
-  return new Promise(resolve => setTimeout(resolve, timeout))
+  return new Promise((resolve) => setTimeout(resolve, timeout))
 }
