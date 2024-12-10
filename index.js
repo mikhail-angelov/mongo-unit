@@ -54,13 +54,13 @@ async function runMongo(opts, port) {
       port: port,
       dbPath: opts.dbpath,
       dbName: opts.dbName,
-      storageEngine: 'ephemeralForTest',
+      storageEngine: 'wiredTiger',
     }
     mongod = await MongoMemoryServer.create(options)
     await mongod.ensureInstance()
   }
   dbUrl = mongod.getUri()
-  client = await MongoClient.connect(dbUrl, { useUnifiedTopology: true })
+  client = await MongoClient.connect(dbUrl)
   dbName = opts.dbName || defaultMongoOpts.dbName
   return dbUrl
 }
