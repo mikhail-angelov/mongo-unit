@@ -21,7 +21,7 @@ describe('mongo-unit', function () {
   afterEach(() => mongoUnit.drop())
 
   it('should safely start mongo several time', () => {
-    return mongoUnit.start().then(url => {
+    return mongoUnit.start().then((url) => {
       expect(url).to.equal(mongoUnit.getUrl())
     })
   })
@@ -141,7 +141,7 @@ describe('mongo-unit', function () {
         expect(mongoUnit.getUrl).to.throw(Error)
         return mongoUnit.start()
       })
-      .then(url => {
+      .then((url) => {
         expect(true).to.equal(!!mongoUnit.getUrl(), {
           useUnifiedTopology: true,
         })

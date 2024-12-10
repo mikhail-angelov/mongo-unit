@@ -2,7 +2,10 @@
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const MongoClient = require('mongodb').MongoClient
-const { MongoMemoryServer, MongoMemoryReplSet } = require('mongodb-memory-server')
+const {
+  MongoMemoryServer,
+  MongoMemoryReplSet,
+} = require('mongodb-memory-server')
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -13,7 +16,7 @@ const defaultMongoOpts = {
   dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
-  useReplicaSet: false
+  useReplicaSet: false,
 }
 
 let mongod = null
@@ -23,7 +26,7 @@ let dbName
 
 async function runMongo(opts, port) {
   const options = {
-    autoStart: false
+    autoStart: false,
   }
 
   if (opts.version) {
@@ -36,12 +39,12 @@ async function runMongo(opts, port) {
         port: port,
         dbPath: opts.dbpath,
         storageEngine: 'wiredTiger',
-      }
+      },
     ]
 
     options.replSet = {
       dbName: opts.dbName,
-      storageEngine: 'wiredTiger'
+      storageEngine: 'wiredTiger',
     }
 
     mongod = await MongoMemoryReplSet.create(options)
@@ -67,23 +70,23 @@ function start(opts) {
     Debug.enable('mongo-unit')
     Debug.enable('*')
   }
-  dbName = mongo_opts.dbName;
+  dbName = mongo_opts.dbName
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
     makeSureTempDirExist(mongo_opts.dbpath, mongo_opts.useReplicaSet)
     return makeSureOtherMongoProcessesKilled(mongo_opts.dbpath)
       .then(() => getFreePort(mongo_opts.port))
-      .then(port => runMongo(mongo_opts, port))
+      .then((port) => runMongo(mongo_opts, port))
   }
 }
 
 function delay(time) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 async function stop() {
-  await  client.close(true)
+  await client.close(true)
   await mongod.stop(true)
   dbUrl = null
   await delay(100) //this is small delay to make sure kill signal is sent
@@ -99,7 +102,7 @@ function getUrl() {
 
 function load(data) {
   const db = client.db(dbName)
-  const queries = Object.keys(data).map(col => {
+  const queries = Object.keys(data).map((col) => {
     const collection = db.collection(col)
     return collection.insertMany(data[col])
   })
@@ -108,7 +111,7 @@ function load(data) {
 
 function clean(data) {
   const db = client.db(dbName)
-  const queries = Object.keys(data).map(col => {
+  const queries = Object.keys(data).map((col) => {
     const collection = db.collection(col)
     return collection.drop()
   })
@@ -161,7 +164,7 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
           return reject(err)
         }
 
-        resultList.forEach(process => {
+        resultList.forEach((process) => {
           if (process) {
             console.log(
               'KILL PID: %s, COMMAND: %s, ARGUMENTS: %s',
@@ -180,7 +183,7 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 
 function initDb(data) {
   const db = client.db(dbName)
-  const requests = Object.keys(data).map(col => {
+  const requests = Object.keys(data).map((col) => {
     const collection = db.collection(col)
     return collection.insertMany(data[col])
   })
@@ -189,8 +192,8 @@ function initDb(data) {
 
 function dropDb() {
   const db = client.db(dbName)
-  return db.collections().then(collections => {
-    const requests = collections.map(col => col.drop())
+  return db.collections().then((collections) => {
+    const requests = collections.map((col) => col.drop())
     return Promise.all(requests)
   })
 }
