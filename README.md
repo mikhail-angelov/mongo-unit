@@ -122,8 +122,6 @@ describe('dao', ()=>{
 
 I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very popular in java world.
 
-> There is alternative library for mocking Mongo: [mockgoose](https://github.com/mockgoose/mockgoose)
-  
 ## Requirements
 It works on Node.js 12+
 
