@@ -30,18 +30,23 @@ async function runMongo(opts, port) {
     options.binary = { version: opts.version }
   }
 
+  let storageEngine;
+  if (opts.storageEngine) {
+    storageEngine = opts.storageEngine;
+  }
+
   if (opts.useReplicaSet) {
     options.instanceOpts = [
       {
         port: port,
         dbPath: opts.dbpath,
-        storageEngine: 'wiredTiger',
+        storageEngine: storageEngine || 'wiredTiger',
       }
     ]
 
     options.replSet = {
       dbName: opts.dbName,
-      storageEngine: 'wiredTiger'
+      storageEngine: storageEngine || 'wiredTiger',
     }
 
     mongod = await MongoMemoryReplSet.create(options)
@@ -51,7 +56,7 @@ async function runMongo(opts, port) {
       port: port,
       dbPath: opts.dbpath,
       dbName: opts.dbName,
-      storageEngine: 'ephemeralForTest',
+      storageEngine: storageEngine || 'ephemeralForTest',
     }
     mongod = await MongoMemoryServer.create(options)
     await mongod.ensureInstance()
