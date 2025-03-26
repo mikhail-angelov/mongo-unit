@@ -63,6 +63,7 @@ async function runMongo(opts, port) {
   }
   dbUrl = mongod.getUri()
   client = await MongoClient.connect(dbUrl, { useUnifiedTopology: true })
+  dbName = opts.dbName || defaultMongoOpts.dbName
   return dbUrl
 }
 

@@ -4,7 +4,7 @@ const expect = require('chai').expect
 const MongoClient = require('mongodb').MongoClient
 const co = require('co')
 
-const DB_NAME = 'test'
+const DB_NAME = 'testDb'
 
 describe('mongo-unit', function () {
   this.timeout(10000000)
