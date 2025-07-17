@@ -152,6 +152,10 @@ function makeSureTempDirExist(dir, useReplicaSet) {
 }
 
 function makeSureOtherMongoProcessesKilled(dataFolder) {
+  if (process.platform === 'win32') {
+    // on windows, we don't kill other processes, because ps-node is broken.
+    return Promise.resolve()
+  }
   return new Promise((resolve, reject) => {
     ps.lookup(
       {
