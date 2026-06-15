@@ -145,7 +145,7 @@ It starts mongod on one of available port and returns Promise with URL to connec
 *  `opts.dbpath` - db path, default: `<node_modules/mongo-unit>\.mongo-unit`
 *  `opts.verbose` - enable debug logs, default: `false`
 *  `opts.version` - specify which version of mongo to download. e.g. `version=v3.6`
-*  `opts.useReplicateSet` - specify we want to start the memory server as a `MongoMemoryReplSet` needed to support transactions, default: `false`
+*  `opts.useReplicaSet` - specify we want to start the memory server as a `MongoMemoryReplSet` needed to support transactions, default: `false`
 *  `opts.storageEngine` - specify the [Mongo storage engine](https://www.mongodb.com/docs/manual/core/storage-engines/) to use (e.g., `wiredTiger`); default: non-replica set `ephemeralForTest`, replica set `wiredTiger`. (Note that as of Mongo 7+, `ephemeralForTest` is no longer supported or allowed, so you will have to specify an option here.)
 
 [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) can also be configured via environment variables.
