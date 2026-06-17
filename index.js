@@ -13,7 +13,8 @@ const defaultMongoOpts = {
   dbName: 'test',
   dbpath: defaultTempDir,
   port: 27017,
-  useReplicaSet: false
+  useReplicaSet: false,
+  storageEngine: 'wiredTiger'
 }
 
 let mongod = null
@@ -56,13 +57,13 @@ async function runMongo(opts, port) {
       port: port,
       dbPath: opts.dbpath,
       dbName: opts.dbName,
-      storageEngine: storageEngine || 'ephemeralForTest',
+      storageEngine: storageEngine || 'wiredTiger',
     }
     mongod = await MongoMemoryServer.create(options)
     await mongod.ensureInstance()
   }
   dbUrl = mongod.getUri()
-  client = await MongoClient.connect(dbUrl, { useUnifiedTopology: true })
+  client = await MongoClient.connect(dbUrl)
   return dbUrl
 }
 
@@ -88,8 +89,8 @@ function delay(time) {
 }
 
 async function stop() {
-  await  client.close(true)
-  await mongod.stop(true)
+  await client.close()
+  await mongod.stop()
   dbUrl = null
   await delay(100) //this is small delay to make sure kill signal is sent
 }

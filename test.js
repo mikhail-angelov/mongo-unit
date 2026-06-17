@@ -28,16 +28,14 @@ describe('mongo-unit', function () {
 
   it('should connect to db and CRUD docs', () =>
     co(function* () {
-      const client = yield MongoClient.connect(mongoUnit.getUrl(), {
-        useUnifiedTopology: true,
-      })
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collection = db.collection('test')
       yield collection.insertOne({ doc: 1 })
       let results = yield collection.find().toArray()
       expect(results.length).to.equal(1)
       expect(results[0].doc).to.equal(1)
-      yield collection.remove({ doc: 1 })
+      yield collection.deleteMany({ doc: 1 })
       results = yield collection.find().toArray()
       expect(results.length).to.equal(0)
       yield client.close()
@@ -46,9 +44,7 @@ describe('mongo-unit', function () {
   it('should load collection data', () =>
     co(function* () {
       yield mongoUnit.load(testData)
-      const client = yield MongoClient.connect(mongoUnit.getUrl(), {
-        useUnifiedTopology: true,
-      })
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collection1 = db.collection('col1')
       const collection2 = db.collection('col2')
@@ -65,9 +61,7 @@ describe('mongo-unit', function () {
     co(function* () {
       yield mongoUnit.load(testData)
       yield mongoUnit.clean(testData)
-      const client = yield MongoClient.connect(mongoUnit.getUrl(), {
-        useUnifiedTopology: true,
-      })
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collection1 = db.collection('col1')
       const collection2 = db.collection('col2')
@@ -82,9 +76,7 @@ describe('mongo-unit', function () {
     co(function* () {
       const url = mongoUnit.getUrl()
       yield mongoUnit.initDb(testData)
-      const client = yield MongoClient.connect(mongoUnit.getUrl(), {
-        useUnifiedTopology: true,
-      })
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collection1 = db.collection('col1')
       const collection2 = db.collection('col2')
@@ -99,9 +91,7 @@ describe('mongo-unit', function () {
     co(function* () {
       yield mongoUnit.initDb(testData)
       yield mongoUnit.dropDb()
-      const client = yield MongoClient.connect(mongoUnit.getUrl(), {
-        useUnifiedTopology: true,
-      })
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collections = yield db.listCollections().toArray()
       expect(collections.length).to.equal(0)
@@ -154,9 +144,7 @@ describe('mongo-unit', function () {
     await mongoUnit.start({ dbName: DB_NAME, useReplicaSet: true })
 
     await mongoUnit.load(testData)
-    const client = await MongoClient.connect(mongoUnit.getUrl(), {
-      useUnifiedTopology: true,
-    })
+    const client = await MongoClient.connect(mongoUnit.getUrl())
     const db = client.db(DB_NAME)
     const collection1 = db.collection('col1')
     let results = await collection1.find().toArray()
