@@ -1,25 +1,35 @@
 const expect = require('chai').expect
 const mongoUnit = require('../index')
-const testMongoUrl = process.env.MONGO_URL
+const mongoose = require('mongoose')
 const testData = require('./fixtures/testData.json')
 
 let service
-mongoUnit.start({ dbName: 'example' }).then(() => {
-  process.env.MONGO_URL = mongoUnit.getUrl()
-  run() // this line start mocha tests
-})
+mongoUnit.start({ dbName: 'example' })
+    .then(() => {
+        const baseUrl = mongoUnit.getUrl()
+        process.env.MONGO_URL = baseUrl + 'example'
+        mongoose.set('strictQuery', false)
+        service = require('./app/service')
+        return new Promise(resolve => setTimeout(resolve, 500))
+    })
+    .then(() => {
+        run()
+    })
+    .catch(err => {
+        console.error('Test initialization error:', err)
+        process.exit(1)
+    })
 
-after(async () => {
+after(async function() {
+  this.timeout(10000)
   const client = service.getClient()
-  await client.disconnect()
+  if (client) {
+    await client.disconnect()
+  }
   await mongoUnit.stop()
 })
 
 describe('service', () => {
-  before(() => {
-    // create it after DB is started
-    service = require('./app/service')
-  })
   beforeEach(() => mongoUnit.initDb(testData))
   afterEach(() => mongoUnit.dropDb())
 
