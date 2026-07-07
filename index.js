@@ -103,13 +103,33 @@ function getUrl() {
   }
 }
 
+function createCollectionIndexes(db, colName, colData) {
+  const collection = db.collection(colName)
+  if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
+    if (colData.indexes && Array.isArray(colData.indexes)) {
+      return collection.createIndexes(colData.indexes)
+    }
+  }
+  return Promise.resolve()
+}
+
+function insertCollectionDocuments(db, colName, colData) {
+  const collection = db.collection(colName)
+  if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
+    if (colData.documents && Array.isArray(colData.documents) && colData.documents.length > 0) {
+      return collection.insertMany(colData.documents)
+    }
+  } else if (Array.isArray(colData) && colData.length > 0) {
+    return collection.insertMany(colData)
+  }
+  return Promise.resolve()
+}
+
 function load(data) {
   const db = client.db(dbName)
-  const queries = Object.keys(data).map(col => {
-    const collection = db.collection(col)
-    return collection.insertMany(data[col])
-  })
-  return Promise.all(queries)
+  const colNames = Object.keys(data)
+  return Promise.all(colNames.map(col => createCollectionIndexes(db, col, data[col])))
+    .then(() => Promise.all(colNames.map(col => insertCollectionDocuments(db, col, data[col]))))
 }
 
 function clean(data) {
@@ -186,11 +206,9 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 
 function initDb(data) {
   const db = client.db(dbName)
-  const requests = Object.keys(data).map(col => {
-    const collection = db.collection(col)
-    return collection.insertMany(data[col])
-  })
-  return Promise.all(requests)
+  const colNames = Object.keys(data)
+  return Promise.all(colNames.map(col => createCollectionIndexes(db, col, data[col])))
+    .then(() => Promise.all(colNames.map(col => insertCollectionDocuments(db, col, data[col]))))
 }
 
 function dropDb() {

@@ -159,20 +159,37 @@ It stops mongod process
 Syncronius API returns URL to connect to test db, if test DB is not started it thows an Exception
 
 ### `load(data)`
-Inserts given data (like below) DB collections, returns Promise.
+Inserts given data into DB collections, returns Promise. Data can be provided in two formats:
 
-```json
-{
-  "collectionName1":[
-    {"field1":"value1"},
-    {"field2":"value2"}
-  ],
-  "collectionName2":[
-    {"field3":"value3"},
-    {"field4":"value4"}
-  ]
-}
-```
+1.  **Simple array of documents (backward compatible):**
+    ```json
+    {
+      "collectionName1":[
+        {"field1":"value1"},
+        {"field2":"value2"}
+      ],
+      "collectionName2":[
+        {"field3":"value3"},
+        {"field4":"value4"}
+      ]
+    }
+    ```
+
+2.  **Object with `indexes` and `documents` (to define indexes):**
+    ```json
+    {
+      "users": {
+        "indexes": [
+          { "key": { "email": 1 }, "name": "email_unique_idx", "unique": true },
+          { "key": { "name": 1 }, "name": "name_idx" }
+        ],
+        "documents": [
+          { "name": "Test User", "email": "test@example.com" }
+        ]
+      }
+    }
+    ```
+This allows you to define indexes (e.g., unique indexes) which will be created before documents are inserted.
 
 ### `clean(data)`
 Clear collections based on given data (data format is the same), returns Promise.
@@ -181,7 +198,7 @@ Clear collections based on given data (data format is the same), returns Promise
 Drops test DB, returns Promise.
 
 ### `initDb(data)`
-helper function, load db data into mongo
+Helper function to load database data into Mongo. Supports the same data formats as [`load(data)`] for specifying documents and indexes.
 
 ### `dropDb()`
 helper function, clear all db data from mongo

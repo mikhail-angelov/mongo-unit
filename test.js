@@ -13,6 +13,17 @@ describe('mongo-unit', function () {
     col1: [{ doc: 1 }, { doc: 2 }],
     col2: [{ rec: 1 }, { rec: 2 }],
   }
+  const testDataWithIndexes = {
+    users: {
+      indexes: [
+        { key: { email: 1 }, name: 'email_unique_idx', unique: true },
+        { key: { name: 1 }, name: 'name_idx' }
+      ],
+      documents: [
+        { name: 'Test User', email: 'test@example.com' }
+      ]
+    }
+  }
 
   before(() => mongoUnit.start({ dbName: DB_NAME }))
 
@@ -95,6 +106,53 @@ describe('mongo-unit', function () {
       const db = client.db(DB_NAME)
       const collections = yield db.listCollections().toArray()
       expect(collections.length).to.equal(0)
+      yield client.close()
+    }))
+
+  it('should create indexes with load function', () =>
+    co(function* () {
+      yield mongoUnit.load(testDataWithIndexes)
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
+      const db = client.db(DB_NAME)
+      const collection = db.collection('users')
+      const indexes = yield collection.listIndexes().toArray()
+      const indexNames = indexes.map(idx => idx.name)
+      expect(indexNames).to.include('email_unique_idx')
+      expect(indexNames).to.include('name_idx')
+      const users = yield collection.find().toArray()
+      expect(users.length).to.equal(1)
+      expect(users[0].name).to.equal('Test User')
+      expect(users[0].email).to.equal('test@example.com')
+      yield client.close()
+    }))
+
+  it('should create indexes with initDb function', () =>
+    co(function* () {
+      yield mongoUnit.initDb(testDataWithIndexes)
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
+      const db = client.db(DB_NAME)
+      const collection = db.collection('users')
+      const indexes = yield collection.listIndexes().toArray()
+      const indexNames = indexes.map(idx => idx.name)
+      expect(indexNames).to.include('email_unique_idx')
+      expect(indexNames).to.include('name_idx')
+      yield client.close()
+    }))
+
+  it('should enforce unique index', () =>
+    co(function* () {
+      yield mongoUnit.load(testDataWithIndexes)
+      const client = yield MongoClient.connect(mongoUnit.getUrl())
+      const db = client.db(DB_NAME)
+      const collection = db.collection('users')
+      let error = null
+      try {
+        yield collection.insertOne({ name: 'Duplicate', email: 'test@example.com' })
+      } catch (err) {
+        error = err
+      }
+      expect(error).to.exist
+      expect(error.code).to.equal(11000)
       yield client.close()
     }))
 
