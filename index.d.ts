@@ -10,7 +10,7 @@ declare module 'mongo-unit' {
 
     export function load(data: object): Promise<void>;
 
-    export function clear(data: object): Promise<void>;
+    export function clean(data: object): Promise<void>;
 
     export function drop(): Promise<void>;
 
