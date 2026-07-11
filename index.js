@@ -101,13 +101,23 @@ function getUrl() {
   } else {
     throw new Error('Please start mongo-unit first, then use this API')
   }
+
 }
 
 function createCollectionIndexes(db, colName, colData) {
   const collection = db.collection(colName)
   if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
-    if (colData.indexes && Array.isArray(colData.indexes)) {
-      return collection.createIndexes(colData.indexes)
+    if (colData.indexes !== undefined) {
+      if (!Array.isArray(colData.indexes)) {
+        return Promise.reject(
+          new Error(
+            `mongo-unit: collection "${colName}" has invalid "indexes" field, expected an array.`
+          )
+        )
+      }
+      if (colData.indexes.length > 0) {
+        return collection.createIndexes(colData.indexes)
+      }
     }
   }
   return Promise.resolve()
@@ -116,8 +126,17 @@ function createCollectionIndexes(db, colName, colData) {
 function insertCollectionDocuments(db, colName, colData) {
   const collection = db.collection(colName)
   if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
-    if (colData.documents && Array.isArray(colData.documents) && colData.documents.length > 0) {
-      return collection.insertMany(colData.documents)
+    if (colData.documents !== undefined) {
+      if (!Array.isArray(colData.documents)) {
+        return Promise.reject(
+          new Error(
+            `mongo-unit: collection "${colName}" has invalid "documents" field, expected an array.`
+          )
+        )
+      }
+      if (colData.documents.length > 0) {
+        return collection.insertMany(colData.documents)
+      }
     }
   } else if (Array.isArray(colData) && colData.length > 0) {
     return collection.insertMany(colData)

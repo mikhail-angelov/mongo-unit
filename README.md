@@ -175,7 +175,7 @@ Inserts given data into DB collections, returns Promise. Data can be provided in
     }
     ```
 
-2.  **Object with `indexes` and `documents` (to define indexes):**
+2.  **Object with `indexes` and `documents` (to define required indexes explicitly in fixture data):**
     ```json
     {
       "users": {
@@ -189,7 +189,12 @@ Inserts given data into DB collections, returns Promise. Data can be provided in
       }
     }
     ```
-This allows you to define indexes (e.g., unique indexes) which will be created before documents are inserted.
+
+This object form lets you declare any indexes that the fixture data needs (for example, unique indexes used to test duplicate-key behavior). All indexes for all collections are created first, and only then are the documents inserted, so the indexes are enforced against the fixture data itself.
+
+> **Note:** mongo-unit does **not** read or infer indexes from Mongoose schemas (or any other schema definition). You have to declare the indexes you want in the fixture data explicitly.
+
+If `indexes` or `documents` is provided but is not an array, `load()` rejects with a clear error so that typos such as `indicies` or `document` do not silently leave the collection empty. `createIndexes()` is only called when `indexes` is a non-empty array.
 
 ### `clean(data)`
 Clear collections based on given data (data format is the same), returns Promise.
@@ -198,7 +203,7 @@ Clear collections based on given data (data format is the same), returns Promise
 Drops test DB, returns Promise.
 
 ### `initDb(data)`
-Helper function to load database data into Mongo. Supports the same data formats as [`load(data)`] for specifying documents and indexes.
+Helper function to load database data into Mongo. Accepts the same data formats as `load(data)`, including the `{ indexes, documents }` object form for declaring required indexes in fixture data.
 
 ### `dropDb()`
 helper function, clear all db data from mongo

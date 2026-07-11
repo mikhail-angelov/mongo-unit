@@ -139,22 +139,108 @@ describe('mongo-unit', function () {
       yield client.close()
     }))
 
-  it('should enforce unique index', () =>
-    co(function* () {
-      yield mongoUnit.load(testDataWithIndexes)
-      const client = yield MongoClient.connect(mongoUnit.getUrl())
-      const db = client.db(DB_NAME)
-      const collection = db.collection('users')
-      let error = null
-      try {
-        yield collection.insertOne({ name: 'Duplicate', email: 'test@example.com' })
-      } catch (err) {
-        error = err
+  it('should enforce unique index during load() itself', () => {
+    const dataWithDuplicateUniqueValues = {
+      users: {
+        indexes: [{ key: { email: 1 }, name: 'email_unique_idx', unique: true }],
+        documents: [
+          { name: 'Alice', email: 'duplicate@example.com' },
+          { name: 'Bob', email: 'duplicate@example.com' }
+        ]
       }
-      expect(error).to.exist
-      expect(error.code).to.equal(11000)
-      yield client.close()
-    }))
+    }
+    return mongoUnit
+      .load(dataWithDuplicateUniqueValues)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.load() to fail for duplicate unique values')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.code).to.equal(11000)
+        }
+      )
+  })
+
+  it('should throw on invalid "indexes" field type', () => {
+    const data = {
+      users: {
+        indexes: 'not-an-array',
+        documents: []
+      }
+    }
+    return mongoUnit
+      .load(data)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.load() to fail for invalid indexes type')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/indexes/)
+        }
+      )
+  })
+
+  it('should throw on invalid "documents" field type', () => {
+    const data = {
+      users: {
+        indexes: [],
+        documents: 'not-an-array'
+      }
+    }
+    return mongoUnit
+      .load(data)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.load() to fail for invalid documents type')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/documents/)
+        }
+      )
+  })
+
+  it('should throw on invalid "indexes" field type for initDb', () => {
+    const data = {
+      users: {
+        indexes: 'not-an-array',
+        documents: []
+      }
+    }
+    return mongoUnit
+      .initDb(data)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.initDb() to fail for invalid indexes type')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/indexes/)
+        }
+      )
+  })
+
+  it('should throw on invalid "documents" field type for initDb', () => {
+    const data = {
+      users: {
+        indexes: [],
+        documents: 'not-an-array'
+      }
+    }
+    return mongoUnit
+      .initDb(data)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.initDb() to fail for invalid documents type')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/documents/)
+        }
+      )
+  })
 
   //   it('should list mongo',(done)=>{
 
