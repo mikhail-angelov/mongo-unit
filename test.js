@@ -222,6 +222,50 @@ describe('mongo-unit', function () {
       )
   })
 
+  it('should throw on unknown collection config fields', () => {
+    const data = {
+      users: {
+        indicies: [],
+        document: []
+      }
+    }
+    return mongoUnit
+      .load(data)
+      .then(
+        () => {
+          throw new Error('expected mongoUnit.load() to fail for unknown collection config fields')
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/unknown/i)
+          expect(err.message).to.match(/indicies/)
+          expect(err.message).to.match(/document/)
+        }
+      )
+  })
+
+  it('should throw on unknown collection config fields for initDb', () => {
+    const data = {
+      users: {
+        indicies: []
+      }
+    }
+    return mongoUnit
+      .initDb(data)
+      .then(
+        () => {
+          throw new Error(
+            'expected mongoUnit.initDb() to fail for unknown collection config fields'
+          )
+        },
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/unknown/i)
+          expect(err.message).to.match(/indicies/)
+        }
+      )
+  })
+
   it('should throw on invalid "documents" field type for initDb', () => {
     const data = {
       users: {

@@ -104,9 +104,32 @@ function getUrl() {
 
 }
 
+const ALLOWED_COLLECTION_KEYS = ['indexes', 'documents']
+
+function validateCollectionData(colName, colData) {
+  if (!colData || typeof colData !== 'object' || Array.isArray(colData)) {
+    return
+  }
+  const unknownKeys = Object.keys(colData).filter(
+    key => !ALLOWED_COLLECTION_KEYS.includes(key)
+  )
+  if (unknownKeys.length > 0) {
+    return new Error(
+      `mongo-unit: collection "${colName}" has unknown config field(s): ${unknownKeys
+        .map(k => `"${k}"`)
+        .join(', ')}. Allowed fields are: ${ALLOWED_COLLECTION_KEYS.map(k => `"${k}"`).join(', ')}.`
+    )
+  }
+  return
+}
+
 function createCollectionIndexes(db, colName, colData) {
   const collection = db.collection(colName)
   if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
+    const validationError = validateCollectionData(colName, colData)
+    if (validationError) {
+      return Promise.reject(validationError)
+    }
     if (colData.indexes !== undefined) {
       if (!Array.isArray(colData.indexes)) {
         return Promise.reject(
