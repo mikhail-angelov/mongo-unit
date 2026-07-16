@@ -106,6 +106,21 @@ function getUrl() {
 
 const ALLOWED_COLLECTION_KEYS = ['indexes', 'documents']
 
+function validateCollectionValueType(colName, colData) {
+  if (colData === null || colData === undefined) {
+    return
+  }
+  if (Array.isArray(colData)) {
+    return
+  }
+  if (typeof colData === 'object') {
+    return
+  }
+  return new Error(
+    `mongo-unit: collection "${colName}" has invalid fixture value type "${typeof colData}", expected an array or an object.`
+  )
+}
+
 function validateCollectionData(colName, colData) {
   if (!colData || typeof colData !== 'object' || Array.isArray(colData)) {
     return
@@ -125,6 +140,10 @@ function validateCollectionData(colName, colData) {
 
 function createCollectionIndexes(db, colName, colData) {
   const collection = db.collection(colName)
+  const valueTypeError = validateCollectionValueType(colName, colData)
+  if (valueTypeError) {
+    return Promise.reject(valueTypeError)
+  }
   if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
     const validationError = validateCollectionData(colName, colData)
     if (validationError) {
@@ -148,6 +167,10 @@ function createCollectionIndexes(db, colName, colData) {
 
 function insertCollectionDocuments(db, colName, colData) {
   const collection = db.collection(colName)
+  const valueTypeError = validateCollectionValueType(colName, colData)
+  if (valueTypeError) {
+    return Promise.reject(valueTypeError)
+  }
   if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
     if (colData.documents !== undefined) {
       if (!Array.isArray(colData.documents)) {
@@ -170,8 +193,13 @@ function insertCollectionDocuments(db, colName, colData) {
 function load(data) {
   const db = client.db(dbName)
   const colNames = Object.keys(data)
-  return Promise.all(colNames.map(col => createCollectionIndexes(db, col, data[col])))
-    .then(() => Promise.all(colNames.map(col => insertCollectionDocuments(db, col, data[col]))))
+  return Promise.all(
+    colNames.map(col => createCollectionIndexes(db, col, data[col]))
+  ).then(() =>
+    Promise.all(
+      colNames.map(col => insertCollectionDocuments(db, col, data[col]))
+    )
+  )
 }
 
 function clean(data) {
@@ -249,8 +277,13 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 function initDb(data) {
   const db = client.db(dbName)
   const colNames = Object.keys(data)
-  return Promise.all(colNames.map(col => createCollectionIndexes(db, col, data[col])))
-    .then(() => Promise.all(colNames.map(col => insertCollectionDocuments(db, col, data[col]))))
+  return Promise.all(
+    colNames.map(col => createCollectionIndexes(db, col, data[col]))
+  ).then(() =>
+    Promise.all(
+      colNames.map(col => insertCollectionDocuments(db, col, data[col]))
+    )
+  )
 }
 
 function dropDb() {

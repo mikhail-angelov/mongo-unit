@@ -222,6 +222,24 @@ describe('mongo-unit', function () {
       )
   })
 
+  it('should throw on invalid collection fixture value type for initDb', () => {
+    const data = {
+      users: 'not-an-array-or-object',
+    }
+    return mongoUnit.initDb(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.initDb() to fail for invalid collection fixture value type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/invalid fixture value type/i)
+        expect(err.message).to.match(/users/)
+      }
+    )
+  })
+
   it('should throw on unknown collection config fields', () => {
     const data = {
       users: {
