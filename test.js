@@ -6,7 +6,7 @@ const co = require('co')
 
 const DB_NAME = 'test'
 
-describe('mongo-unit', function () {
+describe('mongo-unit', function() {
   this.timeout(10000000)
   const mongoUnit = require('./index')
   const testData = {
@@ -17,12 +17,10 @@ describe('mongo-unit', function () {
     users: {
       indexes: [
         { key: { email: 1 }, name: 'email_unique_idx', unique: true },
-        { key: { name: 1 }, name: 'name_idx' }
+        { key: { name: 1 }, name: 'name_idx' },
       ],
-      documents: [
-        { name: 'Test User', email: 'test@example.com' }
-      ]
-    }
+      documents: [{ name: 'Test User', email: 'test@example.com' }],
+    },
   }
 
   before(() => mongoUnit.start({ dbName: DB_NAME }))
@@ -38,7 +36,7 @@ describe('mongo-unit', function () {
   })
 
   it('should connect to db and CRUD docs', () =>
-    co(function* () {
+    co(function*() {
       const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
       const collection = db.collection('test')
@@ -53,7 +51,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should load collection data', () =>
-    co(function* () {
+    co(function*() {
       yield mongoUnit.load(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
@@ -69,7 +67,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should clean collection data', () =>
-    co(function* () {
+    co(function*() {
       yield mongoUnit.load(testData)
       yield mongoUnit.clean(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl())
@@ -84,7 +82,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should init DB data for given URL', () =>
-    co(function* () {
+    co(function*() {
       const url = mongoUnit.getUrl()
       yield mongoUnit.initDb(testData)
       const client = yield MongoClient.connect(mongoUnit.getUrl())
@@ -99,7 +97,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should dropDb DB data for given URL', () =>
-    co(function* () {
+    co(function*() {
       yield mongoUnit.initDb(testData)
       yield mongoUnit.dropDb()
       const client = yield MongoClient.connect(mongoUnit.getUrl())
@@ -110,7 +108,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should create indexes with load function', () =>
-    co(function* () {
+    co(function*() {
       yield mongoUnit.load(testDataWithIndexes)
       const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
@@ -127,7 +125,7 @@ describe('mongo-unit', function () {
     }))
 
   it('should create indexes with initDb function', () =>
-    co(function* () {
+    co(function*() {
       yield mongoUnit.initDb(testDataWithIndexes)
       const client = yield MongoClient.connect(mongoUnit.getUrl())
       const db = client.db(DB_NAME)
@@ -142,84 +140,104 @@ describe('mongo-unit', function () {
   it('should enforce unique index during load() itself', () => {
     const dataWithDuplicateUniqueValues = {
       users: {
-        indexes: [{ key: { email: 1 }, name: 'email_unique_idx', unique: true }],
+        indexes: [
+          { key: { email: 1 }, name: 'email_unique_idx', unique: true },
+        ],
         documents: [
           { name: 'Alice', email: 'duplicate@example.com' },
-          { name: 'Bob', email: 'duplicate@example.com' }
-        ]
-      }
+          { name: 'Bob', email: 'duplicate@example.com' },
+        ],
+      },
     }
-    return mongoUnit
-      .load(dataWithDuplicateUniqueValues)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.load() to fail for duplicate unique values')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.code).to.equal(11000)
-        }
-      )
+    return mongoUnit.load(dataWithDuplicateUniqueValues).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.load() to fail for duplicate unique values'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.code).to.equal(11000)
+      }
+    )
   })
 
   it('should throw on invalid "indexes" field type', () => {
     const data = {
       users: {
         indexes: 'not-an-array',
-        documents: []
-      }
+        documents: [],
+      },
     }
-    return mongoUnit
-      .load(data)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.load() to fail for invalid indexes type')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/indexes/)
-        }
-      )
+    return mongoUnit.load(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.load() to fail for invalid indexes type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/indexes/)
+      }
+    )
   })
 
   it('should throw on invalid "documents" field type', () => {
     const data = {
       users: {
         indexes: [],
-        documents: 'not-an-array'
-      }
+        documents: 'not-an-array',
+      },
     }
-    return mongoUnit
-      .load(data)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.load() to fail for invalid documents type')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/documents/)
-        }
-      )
+    return mongoUnit.load(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.load() to fail for invalid documents type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/documents/)
+      }
+    )
+  })
+
+  it('should throw on invalid collection fixture value type', () => {
+    const data = {
+      users: 'not-an-array-or-object',
+    }
+    return mongoUnit.load(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.load() to fail for invalid collection fixture value type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/invalid fixture value type/i)
+        expect(err.message).to.match(/users/)
+      }
+    )
   })
 
   it('should throw on invalid "indexes" field type for initDb', () => {
     const data = {
       users: {
         indexes: 'not-an-array',
-        documents: []
-      }
+        documents: [],
+      },
     }
-    return mongoUnit
-      .initDb(data)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.initDb() to fail for invalid indexes type')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/indexes/)
-        }
-      )
+    return mongoUnit.initDb(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.initDb() to fail for invalid indexes type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/indexes/)
+      }
+    )
   })
 
   it('should throw on invalid collection fixture value type for initDb', () => {
@@ -244,64 +262,62 @@ describe('mongo-unit', function () {
     const data = {
       users: {
         indicies: [],
-        document: []
-      }
+        document: [],
+      },
     }
-    return mongoUnit
-      .load(data)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.load() to fail for unknown collection config fields')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/unknown/i)
-          expect(err.message).to.match(/indicies/)
-          expect(err.message).to.match(/document/)
-        }
-      )
+    return mongoUnit.load(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.load() to fail for unknown collection config fields'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/unknown/i)
+        expect(err.message).to.match(/indicies/)
+        expect(err.message).to.match(/document/)
+      }
+    )
   })
 
   it('should throw on unknown collection config fields for initDb', () => {
     const data = {
       users: {
-        indicies: []
-      }
+        indicies: [],
+      },
     }
-    return mongoUnit
-      .initDb(data)
-      .then(
-        () => {
-          throw new Error(
-            'expected mongoUnit.initDb() to fail for unknown collection config fields'
-          )
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/unknown/i)
-          expect(err.message).to.match(/indicies/)
-        }
-      )
+    return mongoUnit.initDb(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.initDb() to fail for unknown collection config fields'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/unknown/i)
+        expect(err.message).to.match(/indicies/)
+      }
+    )
   })
 
   it('should throw on invalid "documents" field type for initDb', () => {
     const data = {
       users: {
         indexes: [],
-        documents: 'not-an-array'
-      }
+        documents: 'not-an-array',
+      },
     }
-    return mongoUnit
-      .initDb(data)
-      .then(
-        () => {
-          throw new Error('expected mongoUnit.initDb() to fail for invalid documents type')
-        },
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/documents/)
-        }
-      )
+    return mongoUnit.initDb(data).then(
+      () => {
+        throw new Error(
+          'expected mongoUnit.initDb() to fail for invalid documents type'
+        )
+      },
+      err => {
+        expect(err).to.exist
+        expect(err.message).to.match(/documents/)
+      }
+    )
   })
 
   //   it('should list mongo',(done)=>{

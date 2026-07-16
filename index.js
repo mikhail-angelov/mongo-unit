@@ -2,7 +2,10 @@
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const MongoClient = require('mongodb').MongoClient
-const { MongoMemoryServer, MongoMemoryReplSet } = require('mongodb-memory-server')
+const {
+  MongoMemoryServer,
+  MongoMemoryReplSet,
+} = require('mongodb-memory-server')
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -14,7 +17,7 @@ const defaultMongoOpts = {
   dbpath: defaultTempDir,
   port: 27017,
   useReplicaSet: false,
-  storageEngine: 'wiredTiger'
+  storageEngine: 'wiredTiger',
 }
 
 let mongod = null
@@ -24,16 +27,16 @@ let dbName
 
 async function runMongo(opts, port) {
   const options = {
-    autoStart: false
+    autoStart: false,
   }
 
   if (opts.version) {
     options.binary = { version: opts.version }
   }
 
-  let storageEngine;
+  let storageEngine
   if (opts.storageEngine) {
-    storageEngine = opts.storageEngine;
+    storageEngine = opts.storageEngine
   }
 
   if (opts.useReplicaSet) {
@@ -42,7 +45,7 @@ async function runMongo(opts, port) {
         port: port,
         dbPath: opts.dbpath,
         storageEngine: storageEngine || 'wiredTiger',
-      }
+      },
     ]
 
     options.replSet = {
@@ -73,7 +76,7 @@ function start(opts) {
     Debug.enable('mongo-unit')
     Debug.enable('*')
   }
-  dbName = mongo_opts.dbName;
+  dbName = mongo_opts.dbName
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
@@ -101,7 +104,6 @@ function getUrl() {
   } else {
     throw new Error('Please start mongo-unit first, then use this API')
   }
-
 }
 
 const ALLOWED_COLLECTION_KEYS = ['indexes', 'documents']
@@ -132,7 +134,9 @@ function validateCollectionData(colName, colData) {
     return new Error(
       `mongo-unit: collection "${colName}" has unknown config field(s): ${unknownKeys
         .map(k => `"${k}"`)
-        .join(', ')}. Allowed fields are: ${ALLOWED_COLLECTION_KEYS.map(k => `"${k}"`).join(', ')}.`
+        .join(', ')}. Allowed fields are: ${ALLOWED_COLLECTION_KEYS.map(
+        k => `"${k}"`
+      ).join(', ')}.`
     )
   }
   return
