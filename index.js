@@ -2,7 +2,10 @@
 const Debug = require('debug')
 const portfinder = require('portfinder')
 const MongoClient = require('mongodb').MongoClient
-const { MongoMemoryServer, MongoMemoryReplSet } = require('mongodb-memory-server')
+const {
+  MongoMemoryServer,
+  MongoMemoryReplSet,
+} = require('mongodb-memory-server')
 const fs = require('fs')
 const ps = require('ps-node')
 const debug = Debug('mongo-unit')
@@ -14,7 +17,7 @@ const defaultMongoOpts = {
   dbpath: defaultTempDir,
   port: 27017,
   useReplicaSet: false,
-  storageEngine: 'wiredTiger'
+  storageEngine: 'wiredTiger',
 }
 
 let mongod = null
@@ -24,16 +27,16 @@ let dbName
 
 async function runMongo(opts, port) {
   const options = {
-    autoStart: false
+    autoStart: false,
   }
 
   if (opts.version) {
     options.binary = { version: opts.version }
   }
 
-  let storageEngine;
+  let storageEngine
   if (opts.storageEngine) {
-    storageEngine = opts.storageEngine;
+    storageEngine = opts.storageEngine
   }
 
   if (opts.useReplicaSet) {
@@ -42,7 +45,7 @@ async function runMongo(opts, port) {
         port: port,
         dbPath: opts.dbpath,
         storageEngine: storageEngine || 'wiredTiger',
-      }
+      },
     ]
 
     options.replSet = {
@@ -73,7 +76,7 @@ function start(opts) {
     Debug.enable('mongo-unit')
     Debug.enable('*')
   }
-  dbName = mongo_opts.dbName;
+  dbName = mongo_opts.dbName
   if (dbUrl) {
     return Promise.resolve(dbUrl)
   } else {
@@ -103,13 +106,104 @@ function getUrl() {
   }
 }
 
+const ALLOWED_COLLECTION_KEYS = ['indexes', 'documents']
+
+function validateCollectionValueType(colName, colData) {
+  if (colData === null || colData === undefined) {
+    return
+  }
+  if (Array.isArray(colData)) {
+    return
+  }
+  if (typeof colData === 'object') {
+    return
+  }
+  return new Error(
+    `mongo-unit: collection "${colName}" has invalid fixture value type "${typeof colData}", expected an array or an object.`
+  )
+}
+
+function validateCollectionData(colName, colData) {
+  if (!colData || typeof colData !== 'object' || Array.isArray(colData)) {
+    return
+  }
+  const unknownKeys = Object.keys(colData).filter(
+    key => !ALLOWED_COLLECTION_KEYS.includes(key)
+  )
+  if (unknownKeys.length > 0) {
+    return new Error(
+      `mongo-unit: collection "${colName}" has unknown config field(s): ${unknownKeys
+        .map(k => `"${k}"`)
+        .join(', ')}. Allowed fields are: ${ALLOWED_COLLECTION_KEYS.map(
+        k => `"${k}"`
+      ).join(', ')}.`
+    )
+  }
+  return
+}
+
+function createCollectionIndexes(db, colName, colData) {
+  const collection = db.collection(colName)
+  const valueTypeError = validateCollectionValueType(colName, colData)
+  if (valueTypeError) {
+    return Promise.reject(valueTypeError)
+  }
+  if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
+    const validationError = validateCollectionData(colName, colData)
+    if (validationError) {
+      return Promise.reject(validationError)
+    }
+    if (colData.indexes !== undefined) {
+      if (!Array.isArray(colData.indexes)) {
+        return Promise.reject(
+          new Error(
+            `mongo-unit: collection "${colName}" has invalid "indexes" field, expected an array.`
+          )
+        )
+      }
+      if (colData.indexes.length > 0) {
+        return collection.createIndexes(colData.indexes)
+      }
+    }
+  }
+  return Promise.resolve()
+}
+
+function insertCollectionDocuments(db, colName, colData) {
+  const collection = db.collection(colName)
+  const valueTypeError = validateCollectionValueType(colName, colData)
+  if (valueTypeError) {
+    return Promise.reject(valueTypeError)
+  }
+  if (colData && typeof colData === 'object' && !Array.isArray(colData)) {
+    if (colData.documents !== undefined) {
+      if (!Array.isArray(colData.documents)) {
+        return Promise.reject(
+          new Error(
+            `mongo-unit: collection "${colName}" has invalid "documents" field, expected an array.`
+          )
+        )
+      }
+      if (colData.documents.length > 0) {
+        return collection.insertMany(colData.documents)
+      }
+    }
+  } else if (Array.isArray(colData) && colData.length > 0) {
+    return collection.insertMany(colData)
+  }
+  return Promise.resolve()
+}
+
 function load(data) {
   const db = client.db(dbName)
-  const queries = Object.keys(data).map(col => {
-    const collection = db.collection(col)
-    return collection.insertMany(data[col])
-  })
-  return Promise.all(queries)
+  const colNames = Object.keys(data)
+  return Promise.all(
+    colNames.map(col => createCollectionIndexes(db, col, data[col]))
+  ).then(() =>
+    Promise.all(
+      colNames.map(col => insertCollectionDocuments(db, col, data[col]))
+    )
+  )
 }
 
 function clean(data) {
@@ -186,11 +280,14 @@ function makeSureOtherMongoProcessesKilled(dataFolder) {
 
 function initDb(data) {
   const db = client.db(dbName)
-  const requests = Object.keys(data).map(col => {
-    const collection = db.collection(col)
-    return collection.insertMany(data[col])
-  })
-  return Promise.all(requests)
+  const colNames = Object.keys(data)
+  return Promise.all(
+    colNames.map(col => createCollectionIndexes(db, col, data[col]))
+  ).then(() =>
+    Promise.all(
+      colNames.map(col => insertCollectionDocuments(db, col, data[col]))
+    )
+  )
 }
 
 function dropDb() {

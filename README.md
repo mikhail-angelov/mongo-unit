@@ -159,20 +159,42 @@ It stops mongod process
 Syncronius API returns URL to connect to test db, if test DB is not started it thows an Exception
 
 ### `load(data)`
-Inserts given data (like below) DB collections, returns Promise.
+Inserts given data into DB collections, returns Promise. Data can be provided in two formats:
 
-```json
-{
-  "collectionName1":[
-    {"field1":"value1"},
-    {"field2":"value2"}
-  ],
-  "collectionName2":[
-    {"field3":"value3"},
-    {"field4":"value4"}
-  ]
-}
-```
+1.  **Simple array of documents (backward compatible):**
+    ```json
+    {
+      "collectionName1":[
+        {"field1":"value1"},
+        {"field2":"value2"}
+      ],
+      "collectionName2":[
+        {"field3":"value3"},
+        {"field4":"value4"}
+      ]
+    }
+    ```
+
+2.  **Object with `indexes` and `documents` (to define required indexes explicitly in fixture data):**
+    ```json
+    {
+      "users": {
+        "indexes": [
+          { "key": { "email": 1 }, "name": "email_unique_idx", "unique": true },
+          { "key": { "name": 1 }, "name": "name_idx" }
+        ],
+        "documents": [
+          { "name": "Test User", "email": "test@example.com" }
+        ]
+      }
+    }
+    ```
+
+This object form lets you declare any indexes that the fixture data needs (for example, unique indexes used to test duplicate-key behavior). All indexes for all collections are created first, and only then are the documents inserted, so the indexes are enforced against the fixture data itself.
+
+> **Note:** mongo-unit does **not** read or infer indexes from Mongoose schemas (or any other schema definition). You have to declare the indexes you want in the fixture data explicitly.
+
+If `indexes` or `documents` is provided but is not an array, `load()` rejects with a clear error so that typos such as `indicies` or `document` do not silently leave the collection empty. `createIndexes()` is only called when `indexes` is a non-empty array.
 
 ### `clean(data)`
 Clear collections based on given data (data format is the same), returns Promise.
@@ -181,7 +203,7 @@ Clear collections based on given data (data format is the same), returns Promise
 Drops test DB, returns Promise.
 
 ### `initDb(data)`
-helper function, load db data into mongo
+Helper function to load database data into Mongo. Accepts the same data formats as `load(data)`, including the `{ indexes, documents }` object form for declaring required indexes in fixture data.
 
 ### `dropDb()`
 helper function, clear all db data from mongo
