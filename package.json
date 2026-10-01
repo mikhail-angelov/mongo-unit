@@ -1,6 +1,6 @@
 {
   "name": "mongo-unit",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "mongo db for unit tests",
   "main": "index.js",
   "types": "index.d.ts",
@@ -34,17 +34,17 @@
   },
   "homepage": "https://github.com/mikhail-angelov/mongo-unit#readme",
   "dependencies": {
-    "debug": "^4.3.3",
-    "mongodb": "^6.0.0",
-    "mongodb-memory-server": "^10.0.0",
-    "portfinder": "^1.0.28",
+    "debug": "^4.4.3",
+    "mongodb": "^6.21.0",
+    "mongodb-memory-server": "^10.4.3",
+    "portfinder": "^1.0.38",
     "ps-node": "^0.1.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "co": "^4.6.0",
-    "mocha": "^9.2.0",
-    "mongoose": "^6.2.1",
+    "mocha": "^9.2.2",
+    "mongoose": "^6.13.11",
     "prettier": "^1.19.1"
   }
 }
