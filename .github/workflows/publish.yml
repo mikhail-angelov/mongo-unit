@@ -1,0 +1,28 @@
+name: Publish to npm
+
+# Publishes to npm via OIDC trusted publishing — no NPM_TOKEN, no secrets.
+# Triggered by pushing a bare semver tag (e.g. 3.5.1), which `make release` creates.
+# One-time setup required on npmjs.com: package Settings → Trusted Publisher →
+#   repository mikhail-angelov/mongo-unit, workflow publish.yml.
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC trusted publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
+      - run: npm ci
+      - run: npm publish --provenance --access public

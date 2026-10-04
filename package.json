@@ -8,7 +8,6 @@
     "test": "mocha test.js",
     "test-example": "mocha ./examples/test.it.js --delay",
     "test-format": "prettier --check '**/*.{js,json}'",
-    "release": "git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "format": "prettier --write '**/*.{js,json}'"
   },
   "repository": {

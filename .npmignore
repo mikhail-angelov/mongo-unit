@@ -1,3 +1,5 @@
 examples
 .travis.yml
 test.js
+Makefile
+.github
