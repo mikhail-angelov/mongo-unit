@@ -4,21 +4,22 @@ const mongoose = require('mongoose')
 const testData = require('./fixtures/testData.json')
 
 let service
-mongoUnit.start({ dbName: 'example' })
-    .then(() => {
-        const baseUrl = mongoUnit.getUrl()
-        process.env.MONGO_URL = baseUrl + 'example'
-        mongoose.set('strictQuery', false)
-        service = require('./app/service')
-        return new Promise(resolve => setTimeout(resolve, 500))
-    })
-    .then(() => {
-        run()
-    })
-    .catch(err => {
-        console.error('Test initialization error:', err)
-        process.exit(1)
-    })
+mongoUnit
+  .start({ dbName: 'example' })
+  .then(() => {
+    const baseUrl = mongoUnit.getUrl()
+    process.env.MONGO_URL = baseUrl + 'example'
+    mongoose.set('strictQuery', false)
+    service = require('./app/service')
+    return new Promise(resolve => setTimeout(resolve, 500))
+  })
+  .then(() => {
+    run()
+  })
+  .catch(err => {
+    console.error('Test initialization error:', err)
+    process.exit(1)
+  })
 
 after(async function() {
   this.timeout(10000)

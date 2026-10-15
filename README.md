@@ -1,8 +1,13 @@
 # mongo-unit
 
-This library is done to simplify creation of integration tests for node.js application with Mongo DB.
-I starts local mongodb process using [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) library,
-and it work in "InMemory" mode, which improve performance of your tests.
+[![npm version](https://img.shields.io/npm/v/mongo-unit)](https://www.npmjs.com/package/mongo-unit)
+[![npm downloads](https://img.shields.io/npm/dm/mongo-unit)](https://www.npmjs.com/package/mongo-unit)
+[![CI](https://github.com/mikhail-angelov/mongo-unit/actions/workflows/ci.yml/badge.svg)](https://github.com/mikhail-angelov/mongo-unit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/npm/l/mongo-unit)](LICENSE)
+
+This library simplifies integration tests for Node.js applications that use MongoDB.
+It starts a local MongoDB process with the [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) library
+and runs it in in-memory mode, which keeps your tests fast.
 
 ### How to use it
 
@@ -118,7 +123,6 @@ describe('dao', ()=>{
 ```
 
 ## General info
-[![CircleCI](https://circleci.com/gh/mikhail-angelov/mongo-unit.svg?style=svg)](https://circleci.com/gh/mikhail-angelov/mongo-unit)
 
 I was inspired by [dbUnit](http://dbunit.sourceforge.net) library, which is very popular in java world.
 

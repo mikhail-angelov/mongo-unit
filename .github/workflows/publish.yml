@@ -2,6 +2,7 @@ name: Publish to npm
 
 # Publishes to npm via OIDC trusted publishing — no NPM_TOKEN, no secrets.
 # Triggered by pushing a bare semver tag (e.g. 3.5.1), which `make release` creates.
+# After publishing it creates the matching GitHub Release with generated notes.
 # One-time setup required on npmjs.com: package Settings → Trusted Publisher →
 #   repository mikhail-angelov/mongo-unit, workflow publish.yml.
 
@@ -11,7 +12,7 @@ on:
       - '[0-9]*.[0-9]*.[0-9]*'
 
 permissions:
-  contents: read
+  contents: write # create the GitHub Release
   id-token: write # required for OIDC trusted publishing
 
 jobs:
@@ -26,3 +27,6 @@ jobs:
       - run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
       - run: npm ci
       - run: npm publish --provenance --access public
+      - run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
